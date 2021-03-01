@@ -31,6 +31,7 @@
 #include "L1Trigger/L1TGlobal/interface/CaloTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/EnergySumTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/CorrelationTemplate.h"
+#include "L1Trigger/L1TGlobal/interface/CorrelationThreeBodyTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/CorrelationWithOverlapRemovalTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/ExternalTemplate.h"
 
@@ -138,20 +139,20 @@ namespace l1t {
 
     void setVecExternalTemplate(const std::vector<std::vector<ExternalTemplate> >&);
 
-    //
     inline const std::vector<std::vector<CorrelationTemplate> >& vecCorrelationTemplate() const {
       return m_vecCorrelationTemplate;
     }
-
     void setVecCorrelationTemplate(const std::vector<std::vector<CorrelationTemplate> >&);
 
-    inline const std::vector<std::vector<CorrelationWithOverlapRemovalTemplate> >&
-    vecCorrelationWithOverlapRemovalTemplate() const {
+    inline const std::vector<std::vector<CorrelationThreeBodyTemplate> >& vecCorrelationThreeBodyTemplate() const {
+      return m_vecCorrelationThreeBodyTemplate;
+    }
+    void setVecCorrelationThreeBodyTemplate(const std::vector<std::vector<CorrelationThreeBodyTemplate> >&);
+
+    inline const std::vector<std::vector<CorrelationWithOverlapRemovalTemplate> >& vecCorrelationWithOverlapRemovalTemplate() const {
       return m_vecCorrelationWithOverlapRemovalTemplate;
     }
-
-    void setVecCorrelationWithOverlapRemovalTemplate(
-        const std::vector<std::vector<CorrelationWithOverlapRemovalTemplate> >&);
+    void setVecCorrelationWithOverlapRemovalTemplate(const std::vector<std::vector<CorrelationWithOverlapRemovalTemplate> >&);
 
     // get / set the vectors containing the conditions for correlation templates
     //
@@ -275,6 +276,9 @@ namespace l1t {
     /// parse a correlation condition
     bool parseCorrelation(tmeventsetup::esCondition corrCond, unsigned int chipNr = 0);
 
+    /// parse a three-body correlation condition
+    bool parseCorrelationThreeBody(tmeventsetup::esCondition corrCond, unsigned int chipNr = 0); 
+
     /// parse a correlation condition with overlap removal
     bool parseCorrelationWithOverlapRemoval(const tmeventsetup::esCondition& corrCond, unsigned int chipNr = 0);
 
@@ -366,6 +370,7 @@ namespace l1t {
     std::vector<std::vector<ExternalTemplate> > m_vecExternalTemplate;
 
     std::vector<std::vector<CorrelationTemplate> > m_vecCorrelationTemplate;
+    std::vector<std::vector<CorrelationThreeBodyTemplate> > m_vecCorrelationThreeBodyTemplate;
     std::vector<std::vector<CorrelationWithOverlapRemovalTemplate> > m_vecCorrelationWithOverlapRemovalTemplate;
     std::vector<std::vector<MuonTemplate> > m_corMuonTemplate;
     std::vector<std::vector<CaloTemplate> > m_corCaloTemplate;

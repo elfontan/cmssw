@@ -188,6 +188,12 @@ void GlobalCondition::print(std::ostream& myCout) const {
     }
 
     break;
+    case l1t::CondCorrelationThreeBody: {
+      myCout << "  Condition category: "
+             << "CondCorrelationThreeBody" << std::endl;
+    }
+
+    break;
     case l1t::CondCorrelationWithOverlapRemoval: {
       myCout << "  Condition category: "
              << "CondCorrelationWithOverlapRemoval" << std::endl;

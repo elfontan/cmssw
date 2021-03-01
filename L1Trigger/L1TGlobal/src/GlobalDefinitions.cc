@@ -89,7 +89,8 @@ namespace {
       {"l1t::CondCorrelation", l1t::CondCorrelation},
       {"l1t::CondExternal", l1t::CondExternal},
       {nullptr, (l1t::GtConditionCategory)-1},
-      {"l1t::CondCorrelationWithOverlapRemoval", l1t::CondCorrelationWithOverlapRemoval}};
+      {"l1t::CondCorrelationWithOverlapRemoval", l1t::CondCorrelationWithOverlapRemoval},
+      {"l1t::CondCorrelationThreeBody", l1t::CondCorrelationThreeBody}};
 
 }  // namespace
 // l1t::L1GtBoardType
