@@ -11,7 +11,10 @@
  *
  * \new features: Vladimir Rekovic
  *                - indexing
- *                - correlations with overlap object removal
+ *                - correlations with overlap object removal]
+ *
+ * \new features: Elisa Fontanesi
+ *                - three-body correlations
  *
  * $Date$
  * $Revision$
@@ -126,6 +129,11 @@ void l1t::TriggerMenuParser::setVecCorrelationTemplate(
   m_vecCorrelationTemplate = vecCorrelationTempl;
 }
 
+void l1t::TriggerMenuParser::setVecCorrelationThreeBodyTemplate(
+    const std::vector<std::vector<CorrelationThreeBodyTemplate> >& vecCorrelationThreeBodyTempl) {
+  m_vecCorrelationThreeBodyTemplate = vecCorrelationThreeBodyTempl;
+}
+
 void l1t::TriggerMenuParser::setVecCorrelationWithOverlapRemovalTemplate(
     const std::vector<std::vector<CorrelationWithOverlapRemovalTemplate> >& vecCorrelationWithOverlapRemovalTempl) {
   m_vecCorrelationWithOverlapRemovalTemplate = vecCorrelationWithOverlapRemovalTempl;
@@ -198,6 +206,7 @@ void l1t::TriggerMenuParser::parseCondFormats(const L1TUtmTriggerMenu* utmMenu) 
   m_vecExternalTemplate.resize(m_numberConditionChips);
 
   m_vecCorrelationTemplate.resize(m_numberConditionChips);
+  m_vecCorrelationThreeBodyTemplate.resize(m_numberConditionChips);
   m_vecCorrelationWithOverlapRemovalTemplate.resize(m_numberConditionChips);
   m_corMuonTemplate.resize(m_numberConditionChips);
   m_corCaloTemplate.resize(m_numberConditionChips);
@@ -244,7 +253,7 @@ void l1t::TriggerMenuParser::parseCondFormats(const L1TUtmTriggerMenu* utmMenu) 
       //      long hash = getHash(token);
       const esCondition& condition = condMap.find(token)->second;
 
-      //check to see if this condtion already exists
+      //check to see if this condition already exists
       if ((m_conditionMap[chipNr]).count(condition.getName()) == 0) {
         // parse Calo Conditions (EG, Jets, Taus)
         if (condition.getType() == esConditionType::SingleEgamma ||
@@ -300,6 +309,10 @@ void l1t::TriggerMenuParser::parseCondFormats(const L1TUtmTriggerMenu* utmMenu) 
                    condition.getType() == esConditionType::TransverseMass) {
           parseCorrelation(condition, chipNr);
 
+          //parse three-body Correlation Condition
+        } else if (condition.getType() == esConditionType::InvariantMass3) {
+          parseCorrelationThreeBody(condition, chipNr); 
+
           //parse Externals
         } else if (condition.getType() == esConditionType::Externals) {
           parseExternal(condition, chipNr);
@@ -330,7 +343,7 @@ void l1t::TriggerMenuParser::parseCondFormats(const L1TUtmTriggerMenu* utmMenu) 
               << "DoubleJetOvRm" << std::endl
               << "TripleJetOvRm" << std::endl
               << "QuadJetOvRm" << std::endl
-              << "The above conditions types OvRm are not implemented yet in the parser. Please remove alogrithms that "
+              << "The above conditions types OvRm are not implemented yet in the parser. Please remove algorithms that "
                  "use this type of condtion from L1T Menu!"
               << std::endl;
 
@@ -391,17 +404,20 @@ void l1t::TriggerMenuParser::clearMaps() {
 // if the condition name already exists, do not insert it and return false
 bool l1t::TriggerMenuParser::insertConditionIntoMap(GlobalCondition& cond, const int chipNr) {
   std::string cName = cond.condName();
-  LogTrace("TriggerMenuParser") << "    Trying to insert condition \"" << cName << "\" in the condition map."
-                                << std::endl;
+  //LogTrace("TriggerMenuParser") << "           Trying to insert condition \"" << cName << "\" in the condition map."
+  std::cout << "          Trying to insert condition \"" << cName << "\" in the condition map."
+	    << std::endl;
 
   // no condition name has to appear twice!
   if ((m_conditionMap[chipNr]).count(cName) != 0) {
-    LogTrace("TriggerMenuParser") << "      Condition " << cName << " already exists - not inserted!" << std::endl;
+    std::cout << "          Condition " << cName << " already exists - not inserted!" << std::endl;
+    //LogTrace("TriggerMenuParser") << "          Condition " << cName << " already exists - not inserted!" << std::endl;
     return false;
   }
 
   (m_conditionMap[chipNr])[cName] = &cond;
-  LogTrace("TriggerMenuParser") << "      OK - condition inserted!" << std::endl;
+  std::cout << "          OK - condition inserted!" << std::endl;
+  //LogTrace("TriggerMenuParser") << "          OK - condition inserted!" << std::endl;
 
   return true;
 }
@@ -1068,10 +1084,6 @@ bool l1t::TriggerMenuParser::parseMuon(tmeventsetup::esCondition condMu, unsigne
     relativeBx = object.getBxOffset();
 
     //  Loop over the cuts for this object
-    int upperUnconstrainedPtInd = -1;
-    int lowerUnconstrainedPtInd = 0;
-    int upperImpactParameterInd = -1;
-    int lowerImpactParameterInd = 0;
     int upperThresholdInd = -1;
     int lowerThresholdInd = 0;
     int upperIndexInd = -1;
@@ -1080,27 +1092,15 @@ bool l1t::TriggerMenuParser::parseMuon(tmeventsetup::esCondition condMu, unsigne
     unsigned int etaWindow1Lower = -1, etaWindow1Upper = -1, etaWindow2Lower = -1, etaWindow2Upper = -1;
     int cntPhi = 0;
     unsigned int phiWindow1Lower = -1, phiWindow1Upper = -1, phiWindow2Lower = -1, phiWindow2Upper = -1;
-    int isolationLUT = 0xF;        //default is to ignore unless specified.
-    int impactParameterLUT = 0xF;  //default is to ignore unless specified
-    int charge = -1;               //default value is to ignore unless specified
-    int qualityLUT = 0xFFFF;       //default is to ignore unless specified.
+    int isolationLUT = 0xF;   //default is to ignore unless specified.
+    int charge = -1;          //default value is to ignore unless specified
+    int qualityLUT = 0xFFFF;  //default is to ignore unless specified.
 
     const std::vector<esCut>& cuts = object.getCuts();
     for (size_t kk = 0; kk < cuts.size(); kk++) {
       const esCut cut = cuts.at(kk);
 
       switch (cut.getCutType()) {
-        case esCutType::UnconstrainedPt:
-          lowerUnconstrainedPtInd = cut.getMinimum().index;
-          upperUnconstrainedPtInd = cut.getMaximum().index;
-          break;
-
-        case esCutType::ImpactParameter:
-          lowerImpactParameterInd = cut.getMinimum().index;
-          upperImpactParameterInd = cut.getMaximum().index;
-          impactParameterLUT = l1tstr2int(cut.getData());
-          break;
-
         case esCutType::Threshold:
           lowerThresholdInd = cut.getMinimum().index;
           upperThresholdInd = cut.getMaximum().index;
@@ -1167,12 +1167,6 @@ bool l1t::TriggerMenuParser::parseMuon(tmeventsetup::esCondition condMu, unsigne
     }  //end loop over cuts
 
     // Set the parameter cuts
-    objParameter[cnt].unconstrainedPtHigh = upperUnconstrainedPtInd;
-    objParameter[cnt].unconstrainedPtLow = lowerUnconstrainedPtInd;
-    objParameter[cnt].impactParameterHigh = upperImpactParameterInd;
-    objParameter[cnt].impactParameterLow = lowerImpactParameterInd;
-    objParameter[cnt].impactParameterLUT = impactParameterLUT;
-
     objParameter[cnt].ptHighThreshold = upperThresholdInd;
     objParameter[cnt].ptLowThreshold = lowerThresholdInd;
 
@@ -2472,7 +2466,8 @@ bool l1t::TriggerMenuParser::parseCorrelation(tmeventsetup::esCondition corrCond
   std::string type = l1t2string(corrCond.getType());
   std::string name = l1t2string(corrCond.getName());
 
-  LogDebug("TriggerMenuParser") << " ****************************************** " << std::endl
+  //LogDebug("TriggerMenuParser") << " ****************************************** " << std::endl //EF
+  std::cout << " ****************************************** " << std::endl
                                 << "     (in parseCorrelation) " << std::endl
                                 << " condition = " << condition << std::endl
                                 << " particle  = " << particle << std::endl
@@ -2743,6 +2738,160 @@ bool l1t::TriggerMenuParser::parseCorrelation(tmeventsetup::esCondition corrCond
   return true;
 }
 
+///////////////////////////////////////////////////////
+/**
+ * parseCorrelationThreeBody Parse a correlation condition between three objects and
+ * insert an entry to the conditions map
+ *
+ * @param node The corresponding node.
+ * @param name The name of the condition.
+ * @param chipNr The number of the chip this condition is located.
+ *
+ * @return "true" if succeeded, "false" if an error occurred.
+ *
+ */
+
+bool l1t::TriggerMenuParser::parseCorrelationThreeBody(tmeventsetup::esCondition corrCond, unsigned int chipNr) {
+  using namespace tmeventsetup;
+
+  std::string condition = "corrThreeBody";
+  std::string particle = "muon";
+  std::string type = l1t2string(corrCond.getType());
+  std::string name = l1t2string(corrCond.getName());
+
+  //LogDebug("TriggerMenuParser") << " ****************************************** " << std::endl //EF
+  std::cout << " ****************************************** " << std::endl
+                                << "     (in parseCorrelationThreeBody) " << std::endl
+                                << " condition = " << condition << std::endl
+                                << " particle  = " << particle << std::endl
+                                << " type      = " << type << std::endl
+                                << " name      = " << name << std::endl;
+
+  // create a new correlation condition
+  CorrelationThreeBodyTemplate correlationThreeBodyCond(name);
+
+  // check that the condition does not exist already in the map
+  if (!insertConditionIntoMap(correlationThreeBodyCond, chipNr)) {
+    edm::LogError("TriggerMenuParser") << "    Error: duplicate correlation condition (" << name << ")" << std::endl;
+    return false;
+  }
+
+  // Define some of the quantities to store the parsed information
+  // EF FIXE: make sure that the obj type is ok
+  //GtConditionType cType = l1t::Type2cor;
+  GtConditionType cType = l1t::Type3s;
+
+  // three objects (for sure)
+  const int nrObj = 3;
+
+  // object types and greater equal flag - filled in the loop
+  //int intGEq[nrObj] = {-1, -1, -1};
+  std::vector<GlobalObject> objType(nrObj);          
+  std::vector<GtConditionCategory> condCateg(nrObj); 
+
+  // correlation flag and index in the cor*vector
+  const bool corrFlag = true;
+  int corrIndexVal[nrObj] = {-1, -1, -1};
+
+  // Storage of the correlation selection
+  CorrelationThreeBodyTemplate::CorrelationThreeBodyParameter corrParameter;
+
+  // Get the correlation cuts on the legs
+  int cutType = 0;
+  const std::vector<esCut>& cuts = corrCond.getCuts();
+  for (size_t lll = 0; lll < cuts.size(); lll++) {
+    const esCut cut = cuts.at(lll);
+
+    //
+    //  Until utm has method to calculate these, do the integer value calculation with precision.
+    //
+    double minV = cut.getMinimum().value;
+    double maxV = cut.getMaximum().value;
+    
+    //Scale down very large numbers out of xml
+    if (maxV > 1.0e8)
+      maxV = 1.0e8;
+    
+    if (cut.getCutType() == esCutType::Mass) {
+      //LogDebug("TriggerMenuParser") << "CutType: " << cut.getCutType() << "\tMass Cut minV = " << minV
+      std::cout << "CutType: " << cut.getCutType() 
+		<< "\tMass Cut minV = " << minV
+		<< "\tMass Cut maxV = " << maxV 
+		<< " precMin = " << cut.getMinimum().index		    
+		<< " precMax = " << cut.getMaximum().index << std::endl;
+      corrParameter.minMassCutValue = (long long)(minV * pow(10., cut.getMinimum().index));
+      corrParameter.maxMassCutValue = (long long)(maxV * pow(10., cut.getMaximum().index));
+      corrParameter.precMassCut = cut.getMinimum().index;
+      cutType = cutType | 0x8;
+    }
+  }
+  corrParameter.corrCutType = cutType;
+
+  // Get the three objects that form the legs
+  const std::vector<esObject>& objects = corrCond.getObjects();
+  if (objects.size() != 3) {
+    edm::LogError("TriggerMenuParser") << "incorrect number of objects for the correlation condition " << name
+                                       << " corrFlag " << corrFlag << std::endl;
+    return false;
+  }
+
+  // Loop over legs
+  for (size_t lll = 0; lll < objects.size(); lll++) {
+    const esObject object = objects.at(lll);
+    std::cout << "      obj name = " << object.getName() << "\n";
+    std::cout << "      obj type = " << object.getType() << "\n";
+    //std::cout << "      obj bx = " << object.getBxOffset() << "\n";
+
+    // check the leg type
+    if (object.getType() == esObjectType::Muon) {
+      // we have a muon
+      parseMuonCorr(&object, chipNr);
+      corrIndexVal[lll] = (m_corMuonTemplate[chipNr]).size() - 1;
+
+      //Now set some flags for this subCondition
+      objType[lll] = gtMu;
+      condCateg[lll] = CondMuon;
+
+    } else {
+      edm::LogError("TriggerMenuParser") << "Checked the object Type " << object.getType()
+                                         << " for the correlation condition " << name 
+					 << ": no three muons in the event!" << std::endl;
+      //return false; // EF FIXME: Temporary solution to be investigated => 
+                      // what should we do in case we do not have three muons in the event with the parseCorrelationThreeBodyFunction? 
+    }  
+  }  // End loop over legs
+
+  // fill the correlation condition
+  correlationThreeBodyCond.setCondType(cType);
+  correlationThreeBodyCond.setObjectType(objType);
+  correlationThreeBodyCond.setCondChipNr(chipNr);
+
+  correlationThreeBodyCond.setCond0Category(condCateg[0]);
+  correlationThreeBodyCond.setCond1Category(condCateg[1]);
+  correlationThreeBodyCond.setCond2Category(condCateg[2]);
+
+  correlationThreeBodyCond.setCond0Index(corrIndexVal[0]);
+  correlationThreeBodyCond.setCond1Index(corrIndexVal[1]);
+  correlationThreeBodyCond.setCond2Index(corrIndexVal[2]);
+
+  correlationThreeBodyCond.setCorrelationThreeBodyParameter(corrParameter);
+
+  if (edm::isDebugEnabled()) {
+    std::ostringstream myCoutStream;
+    correlationThreeBodyCond.print(myCoutStream);
+    LogTrace("TriggerMenuParser") << myCoutStream.str() << "\n" << std::endl;
+  }
+
+  // insert condition into the map
+  // condition is not duplicate, check was done at the beginning
+
+  (m_vecCorrelationThreeBodyTemplate[chipNr]).push_back(correlationThreeBodyCond);
+
+  //
+  return true;
+}
+//////////////////////////////////////////////////////////////////////////////77
+
 /**
  * parseCorrelationWithOverlapRemoval Parse a correlation condition and
  * insert an entry to the conditions map
@@ -2764,8 +2913,8 @@ bool l1t::TriggerMenuParser::parseCorrelationWithOverlapRemoval(const tmeventset
   std::string type = l1t2string(corrCond.getType());
   std::string name = l1t2string(corrCond.getName());
 
-  LogDebug("TriggerMenuParser") << " ****************************************** " << std::endl
-                                << "     (in parseCorrelationWithOverlapRemoval) " << std::endl
+  LogDebug("TriggerMenuParser") << " ****************************************** " << std::endl 
+                                  << "     (in parseCorrelationWithOverlapRemoval) " << std::endl
                                 << " condition = " << condition << std::endl
                                 << " particle  = " << particle << std::endl
                                 << " type      = " << type << std::endl
