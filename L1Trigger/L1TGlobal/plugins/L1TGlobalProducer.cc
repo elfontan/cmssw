@@ -117,12 +117,12 @@ L1TGlobalProducer::L1TGlobalProducer(const edm::ParameterSet& parSet)
   m_l1GtStableParToken = esConsumes<L1TGlobalParameters, L1TGlobalParametersRcd>();
   m_l1GtMenuToken = esConsumes<L1TUtmTriggerMenu, L1TUtmTriggerMenuRcd>();
   if (!(m_algorithmTriggersUnprescaled && m_algorithmTriggersUnmasked)) {
-    m_l1GtPrescaleVetosToken = esConsumes<L1TGlobalPrescalesVetosFract, L1TGlobalPrescalesVetosFractRcd>();
+    m_l1GtPrescaleVetosToken = esConsumes<L1TGlobalPrescalesVetos, L1TGlobalPrescalesVetosRcd>();
   }
   if (m_getPrescaleColumnFromData || m_requireMenuToMatchAlgoBlkInput) {
     m_algoblkInputToken = consumes<BXVector<GlobalAlgBlk>>(m_algoblkInputTag);
   }
-
+  
   if (m_verbosity) {
     LogTrace("L1TGlobalProducer") << "\nInput tag for muon collection from uGMT:         " << m_muInputTag
                                   << "\nInput tag for calorimeter jet collections from Cal: " << m_jetInputTag
@@ -225,9 +225,9 @@ L1TGlobalProducer::L1TGlobalProducer(const edm::ParameterSet& parSet)
   m_currentLumi = 0;
 
   // Set default, initial, dummy prescale factor table
-  std::vector<std::vector<double>> temp_prescaleTable;
+  std::vector<std::vector<int>> temp_prescaleTable;
 
-  temp_prescaleTable.push_back(std::vector<double>());
+  temp_prescaleTable.push_back(std::vector<int>());
   m_initialPrescaleFactorsAlgoTrig = temp_prescaleTable;
 }
 
@@ -333,6 +333,7 @@ void L1TGlobalProducer::produce(edm::Event& iEvent, const edm::EventSetup& evSet
                                                gtParser.vecEnergySumTemplate(),
                                                gtParser.vecExternalTemplate(),
                                                gtParser.vecCorrelationTemplate(),
+                                               gtParser.vecCorrelationThreeBodyTemplate(),
                                                gtParser.vecCorrelationWithOverlapRemovalTemplate(),
                                                gtParser.corMuonTemplate(),
                                                gtParser.corCaloTemplate(),
@@ -385,16 +386,15 @@ void L1TGlobalProducer::produce(edm::Event& iEvent, const edm::EventSetup& evSet
 
   // Only get event record if not unprescaled and not unmasked
   if (!(m_algorithmTriggersUnprescaled && m_algorithmTriggersUnmasked)) {
-    unsigned long long l1GtPfAlgoCacheID = evSetup.get<L1TGlobalPrescalesVetosFractRcd>().cacheIdentifier();
+    unsigned long long l1GtPfAlgoCacheID = evSetup.get<L1TGlobalPrescalesVetosRcd>().cacheIdentifier();
 
     if (m_l1GtPfAlgoCacheID != l1GtPfAlgoCacheID) {
-      edm::ESHandle<L1TGlobalPrescalesVetosFract> l1GtPrescalesFractVetoes =
-          evSetup.getHandle(m_l1GtPrescaleVetosToken);
-      const L1TGlobalPrescalesVetosFract* es = l1GtPrescalesFractVetoes.product();
-      m_l1GtPrescalesVetosFract = PrescalesVetosFractHelper::readFromEventSetup(es);
+      edm::ESHandle<L1TGlobalPrescalesVetos> l1GtPrescalesVetoes = evSetup.getHandle(m_l1GtPrescaleVetosToken);
+      const L1TGlobalPrescalesVetos* es = l1GtPrescalesVetoes.product();
+      m_l1GtPrescalesVetoes = PrescalesVetosHelper::readFromEventSetup(es);
 
-      m_prescaleFactorsAlgoTrig = &(m_l1GtPrescalesVetosFract->prescaleTable());
-      m_triggerMaskVetoAlgoTrig = &(m_l1GtPrescalesVetosFract->triggerMaskVeto());
+      m_prescaleFactorsAlgoTrig = &(m_l1GtPrescalesVetoes->prescaleTable());
+      m_triggerMaskVetoAlgoTrig = &(m_l1GtPrescalesVetoes->triggerMaskVeto());
 
       m_l1GtPfAlgoCacheID = l1GtPfAlgoCacheID;
     }
@@ -540,7 +540,7 @@ void L1TGlobalProducer::produce(edm::Event& iEvent, const edm::EventSetup& evSet
     pfAlgoSetIndex = max;
   }
 
-  const std::vector<double>& prescaleFactorsAlgoTrig = (*m_prescaleFactorsAlgoTrig).at(pfAlgoSetIndex);
+  const std::vector<int>& prescaleFactorsAlgoTrig = (*m_prescaleFactorsAlgoTrig).at(pfAlgoSetIndex);
 
   // For now, set masks according to prescale value of 0
   m_initialTriggerMaskAlgoTrig.clear();

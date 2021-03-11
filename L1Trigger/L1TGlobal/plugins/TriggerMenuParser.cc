@@ -2732,8 +2732,7 @@ bool l1t::TriggerMenuParser::parseCorrelation(tmeventsetup::esCondition corrCond
   // insert condition into the map
   // condition is not duplicate, check was done at the beginning
 
-  (m_vecCorrelationTemplate[chipNr]).push_back(correlationCond);
-
+  (m_vecCorrelationTemplate[chipNr]).push_back(correlationCond); 
   //
   return true;
 }
@@ -2829,6 +2828,7 @@ bool l1t::TriggerMenuParser::parseCorrelationThreeBody(tmeventsetup::esCondition
 
   // Get the three objects that form the legs
   const std::vector<esObject>& objects = corrCond.getObjects();
+  std::cout << "Number of objects: " << objects.size() << std::endl;
   if (objects.size() != 3) {
     edm::LogError("TriggerMenuParser") << "incorrect number of objects for the correlation condition " << name
                                        << " corrFlag " << corrFlag << std::endl;
@@ -2886,7 +2886,7 @@ bool l1t::TriggerMenuParser::parseCorrelationThreeBody(tmeventsetup::esCondition
   // condition is not duplicate, check was done at the beginning
 
   (m_vecCorrelationThreeBodyTemplate[chipNr]).push_back(correlationThreeBodyCond);
-
+  
   //
   return true;
 }

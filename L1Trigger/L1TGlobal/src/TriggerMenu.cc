@@ -266,9 +266,9 @@ void TriggerMenu::buildGtConditionMap() {
   }
 
   //
-  size_t vecCorrelation3Size = m_vecCorrelationThreeBodyTemplate.size();
-  if (condMapSize < vecCorrelation3Size) {
-    m_conditionMap.resize(vecCorrelation3Size);
+  size_t vecCorrelationThreeBodySize = m_vecCorrelationThreeBodyTemplate.size();
+  if (condMapSize < vecCorrelationThreeBodySize) {
+    m_conditionMap.resize(vecCorrelationThreeBodySize);
     condMapSize = m_conditionMap.size();
   }
 
@@ -276,6 +276,7 @@ void TriggerMenu::buildGtConditionMap() {
   for (std::vector<std::vector<CorrelationThreeBodyTemplate> >::iterator itCondOnChip = m_vecCorrelationThreeBodyTemplate.begin();
        itCondOnChip != m_vecCorrelationThreeBodyTemplate.end();
        itCondOnChip++) {
+    std::cout << "EF vecCorrelationThreeBodySize is " << vecCorrelationThreeBodySize << std::endl;
     chipNr++;
 
     for (std::vector<CorrelationThreeBodyTemplate>::iterator itCond = itCondOnChip->begin(); itCond != itCondOnChip->end();
@@ -346,8 +347,8 @@ void TriggerMenu::setVecCorrelationTemplate(const std::vector<std::vector<Correl
   m_vecCorrelationTemplate = vecCorrelationTempl;
 }
 
-void TriggerMenu::setVecCorrelationThreeBodyTemplate(const std::vector<std::vector<CorrelationThreeBodyTemplate> >& vecCorrelationTempl) {
-  m_vecCorrelationThreeBodyTemplate = vecCorrelationTempl;
+void TriggerMenu::setVecCorrelationThreeBodyTemplate(const std::vector<std::vector<CorrelationThreeBodyTemplate> >& vecCorrelationThreeBodyTempl) {
+  m_vecCorrelationThreeBodyTemplate = vecCorrelationThreeBodyTempl;
 }
 
 void TriggerMenu::setVecCorrelationWithOverlapRemovalTemplate(const std::vector<std::vector<CorrelationWithOverlapRemovalTemplate> >& vecCorrelationTempl) {

@@ -7,5 +7,6 @@ namespace L1Trigger_L1TGlobal {
     std::vector<CaloTemplate> dummy2;
     std::vector<CorrelationTemplate> dummy3;
     std::vector<CorrelationWithOverlapRemovalTemplate> dummy4;
+    std::vector<CorrelationThreeBodyTemplate> dummy5;
   };
 }  // namespace L1Trigger_L1TGlobal

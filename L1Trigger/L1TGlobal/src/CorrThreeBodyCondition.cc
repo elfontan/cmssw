@@ -93,7 +93,7 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
   //std::ostringstream myCout;
   //m_gtCorrelationThreeBodyTemplate->print(myCout); 
   //LogDebug("L1TGlobal")
-  //std::cout << "Correlation Condition Evaluation \n" << myCout.str() << std::endl; 
+  std::cout << "EF Three-body Correlation Condition Evaluation" << std::endl; 
 
   bool condResult = false;
   bool reqObjResult = false;
@@ -297,9 +297,13 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
   std::string lutObj1 = "NULL";
   std::string lutObj2 = "NULL";
 
-  LogTrace("L1TGlobal") << "  Subcondition 0: std::vector<SingleCombInCond> size: " << (cond0Comb.size()) << std::endl;
-  LogTrace("L1TGlobal") << "  Subcondition 1: std::vector<SingleCombInCond> size: " << (cond1Comb.size()) << std::endl;
-  LogTrace("L1TGlobal") << "  Subcondition 2: std::vector<SingleCombInCond> size: " << (cond2Comb.size()) << std::endl;
+  // EF
+  std::cout << "  Subcondition 0: std::vector<SingleCombInCond> size: " << (cond0Comb.size()) << std::endl;
+  std::cout << "  Subcondition 1: std::vector<SingleCombInCond> size: " << (cond1Comb.size()) << std::endl;
+  std::cout << "  Subcondition 2: std::vector<SingleCombInCond> size: " << (cond2Comb.size()) << std::endl;
+  //LogTrace("L1TGlobal") << "  Subcondition 0: std::vector<SingleCombInCond> size: " << (cond0Comb.size()) << std::endl;
+  //LogTrace("L1TGlobal") << "  Subcondition 1: std::vector<SingleCombInCond> size: " << (cond1Comb.size()) << std::endl;
+  //LogTrace("L1TGlobal") << "  Subcondition 2: std::vector<SingleCombInCond> size: " << (cond2Comb.size()) << std::endl;
 
   // LOOP OVER ALL COMBINATIONS
   //
@@ -597,7 +601,7 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
 	  if (massSq >= 0 && massSq >= (long long)(corrPar.minMassCutValue * pow(10, preShift)) &&
 	      massSq <= (long long)(corrPar.maxMassCutValue * pow(10, preShift))) {
 	    // LogDebug("L1TGlobal") << "    Passed Invariant Mass Cut [" // EF 
-	    cout << "    Passed Invariant Mass Cut ["
+	    std::cout << "    Passed Invariant Mass Cut ["
 		 << (long long)(corrPar.minMassCutValue * pow(10, preShift)) << ","
 		 << (long long)(corrPar.maxMassCutValue * pow(10, preShift)) << "]" << std::endl;
 	    
