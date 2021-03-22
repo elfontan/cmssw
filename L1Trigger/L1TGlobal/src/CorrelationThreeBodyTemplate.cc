@@ -32,8 +32,8 @@
 //   default
 
 CorrelationThreeBodyTemplate::CorrelationThreeBodyTemplate() : GlobalCondition() {
-  m_condCategory = l1t::CondCorrelation;  // FIXME EF: CondCorrelationThreeBody
-  m_condType = l1t::Type3s; // FIXME EF: l1t::Type2cor
+  m_condCategory = l1t::CondCorrelationThreeBody; 
+  m_condType = l1t::Type3s;
   m_condChipNr = -1;
 
   // there are in fact two objects

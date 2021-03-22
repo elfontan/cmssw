@@ -6,7 +6,6 @@
  */
 
 // this class header
-#include "L1Trigger/L1TGlobal/interface/CorrCondition.h" // FIXME EF => Kept for initial tests: probably TO BE REMOVED LATER
 #include "L1Trigger/L1TGlobal/interface/CorrThreeBodyCondition.h"
 
 // system include files
@@ -19,22 +18,15 @@
 
 // user include files
 //   base classes
-#include "L1Trigger/L1TGlobal/interface/CorrelationTemplate.h" // FIXME EF => Kept for initial tests: probably TO BE REMOVED LATER
 #include "L1Trigger/L1TGlobal/interface/CorrelationThreeBodyTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/ConditionEvaluation.h"
 
 #include "L1Trigger/L1TGlobal/interface/MuCondition.h"
-#include "L1Trigger/L1TGlobal/interface/CaloCondition.h"
-#include "L1Trigger/L1TGlobal/interface/EnergySumCondition.h"
 #include "L1Trigger/L1TGlobal/interface/MuonTemplate.h"
-#include "L1Trigger/L1TGlobal/interface/CaloTemplate.h"
-#include "L1Trigger/L1TGlobal/interface/EnergySumTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/GlobalScales.h"
-
-#include "DataFormats/L1Trigger/interface/L1Candidate.h"
-
 #include "L1Trigger/L1TGlobal/interface/GlobalBoard.h"
 
+#include "DataFormats/L1Trigger/interface/L1Candidate.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/MessageLogger/interface/MessageDrop.h"
 
@@ -255,8 +247,8 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
   double phi0Phy = 0.;
   int phiIndex1 = 0;
   double phi1Phy = 0.;
-  //int phiIndex2 = 0;
-  //double phi2Phy = 0.;
+  int phiIndex2 = 0;
+  double phi2Phy = 0.;
 
   int etaIndex0 = 0;
   double eta0Phy = 0.;
@@ -265,7 +257,7 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
   double eta1Phy = 0.;
   int etaBin1 = 0;
   int etaIndex2 = 0;
-  //double eta2Phy = 0.;
+  double eta2Phy = 0.;
   int etaBin2 = 0;
 
   int etIndex0 = 0;
@@ -276,7 +268,7 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
   double et1Phy = 0.;
   int etIndex2 = 0;
   int etBin2 = 0;
-  //double et2Phy = 0.;
+  double et2Phy = 0.;
 
   // Determine the number of phi bins to get cutoff at pi
   int phiBound = 0;
@@ -453,14 +445,13 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
             etBin2 = ssize - 1;
 	  }
 	  
-	  // EF FIXME
           // Determine Floating Pt numbers for floating point calculation
-          //std::pair<double, double> binEdges = m_gtScales->getMUScales().phiBins.at(phiIndex2);
-          //phi2Phy = 0.5 * (binEdges.second + binEdges.first);
-          //binEdges = m_gtScales->getMUScales().etaBins.at(etaBin2);
-          //eta2Phy = 0.5 * (binEdges.second + binEdges.first);
-          //binEdges = m_gtScales->getMUScales().etBins.at(etBin2);
-          //et2Phy = 0.5 * (binEdges.second + binEdges.first); 
+          std::pair<double, double> binEdges = m_gtScales->getMUScales().phiBins.at(phiIndex2);
+          phi2Phy = 0.5 * (binEdges.second + binEdges.first);
+          binEdges = m_gtScales->getMUScales().etaBins.at(etaBin2);
+          eta2Phy = 0.5 * (binEdges.second + binEdges.first);
+          binEdges = m_gtScales->getMUScales().etBins.at(etBin2);
+          et2Phy = 0.5 * (binEdges.second + binEdges.first); 
         } 
 	
 	else {
@@ -471,7 +462,7 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
 	
 	//if (m_verbosity) {
 	//  LogDebug("L1TGlobal") << "    Correlation pair [" << l1TGtObjectEnumToString(cndObjTypeVec[0]) << ", "
-	std::cout << "    Correlation pair [" << l1TGtObjectEnumToString(cndObjTypeVec[0]) << ", "
+	std::cout << "    Three-body correlation pair [" << l1TGtObjectEnumToString(cndObjTypeVec[0]) << ", "
 		  << l1TGtObjectEnumToString(cndObjTypeVec[1]) << "] with collection indices [" << obj0Index
 		  << ", " << obj1Index << "] "
 		  << " has: \n"
@@ -482,7 +473,7 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
 	//}
 
 	std::cout << ">>>>>> ELISA: 3MUON EVENT" << std::endl;
-	// Now perform the desired correlation on these two objects. Assume true until we find a contradition
+	// Now perform the desired correlation on these three objects. Assume true until we find a contradition
 	bool reqResult = true;
 	
 	// clear the indices in the combination
@@ -496,62 +487,135 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
 	
 	// Delta eta and phi calculations needed to evaluate the three-body invariant mass.
 	// ...need to revise this to line up with firmware calculations.
-	double deltaPhiPhy = fabs(phi1Phy - phi0Phy);
-	if (deltaPhiPhy > M_PI)
-	  deltaPhiPhy = 2. * M_PI - deltaPhiPhy;
-	double deltaEtaPhy = fabs(eta1Phy - eta0Phy);
+	double deltaPhiPhy_01 = fabs(phi1Phy - phi0Phy);
+	if (deltaPhiPhy_01 > M_PI)
+	  deltaPhiPhy_01 = 2. * M_PI - deltaPhiPhy_01;
+	double deltaEtaPhy_01 = fabs(eta1Phy - eta0Phy);
+
+	double deltaPhiPhy_02 = fabs(phi2Phy - phi0Phy);
+	if (deltaPhiPhy_02 > M_PI)
+	  deltaPhiPhy_02 = 2. * M_PI - deltaPhiPhy_02;
+	double deltaEtaPhy_02 = fabs(eta2Phy - eta0Phy);
+
+	double deltaPhiPhy_12 = fabs(phi2Phy - phi1Phy);
+	if (deltaPhiPhy_12 > M_PI)
+	  deltaPhiPhy_12 = 2. * M_PI - deltaPhiPhy_12;
+	double deltaEtaPhy_12 = fabs(eta2Phy - eta1Phy);
 	
 	// Determine the integer based delta eta and delta phi
-	int deltaPhiFW = abs(phiIndex0 - phiIndex1);
-	if (deltaPhiFW >= phiBound)
-	  deltaPhiFW = 2 * phiBound - deltaPhiFW;
-	std::string lutName = lutObj0;
-	lutName += "-";
-	lutName += lutObj1;
-	long long deltaPhiLUT = m_gtScales->getLUT_DeltaPhi(lutName, deltaPhiFW);
-	unsigned int precDeltaPhiLUT = m_gtScales->getPrec_DeltaPhi(lutName);
+	int deltaPhiFW_01 = abs(phiIndex0 - phiIndex1);
+	if (deltaPhiFW_01 >= phiBound) //FIXME: understand better phiBound
+	  deltaPhiFW_01 = 2 * phiBound - deltaPhiFW_01;
+	std::string lutName_01 = lutObj0;
+	lutName_01 += "-";
+	lutName_01 += lutObj1;
+	long long deltaPhiLUT_01 = m_gtScales->getLUT_DeltaPhi(lutName_01, deltaPhiFW_01);
+	unsigned int precDeltaPhiLUT_01 = m_gtScales->getPrec_DeltaPhi(lutName_01);
 	
-	int deltaEtaFW = abs(etaIndex0 - etaIndex1);
-	long long deltaEtaLUT = 0;
-	unsigned int precDeltaEtaLUT = 0;
+	int deltaEtaFW_01 = abs(etaIndex0 - etaIndex1);
+	long long deltaEtaLUT_01 = 0;
+	unsigned int precDeltaEtaLUT_01 = 0;
 	//if (!etSumCond) {
-	deltaEtaLUT = m_gtScales->getLUT_DeltaEta(lutName, deltaEtaFW);
-	precDeltaEtaLUT = m_gtScales->getPrec_DeltaEta(lutName); //}
+	deltaEtaLUT_01 = m_gtScales->getLUT_DeltaEta(lutName_01, deltaEtaFW_01);
+	precDeltaEtaLUT_01 = m_gtScales->getPrec_DeltaEta(lutName_01); //}
+
+	int deltaPhiFW_02 = abs(phiIndex0 - phiIndex2);
+	if (deltaPhiFW_02 >= phiBound) //FIXME: understand better phiBound
+	  deltaPhiFW_02 = 2 * phiBound - deltaPhiFW_02;
+	std::string lutName_02 = lutObj0;
+	lutName_02 += "-";
+	lutName_02 += lutObj2;
+	long long deltaPhiLUT_02 = m_gtScales->getLUT_DeltaPhi(lutName_02, deltaPhiFW_02);
+	unsigned int precDeltaPhiLUT_02 = m_gtScales->getPrec_DeltaPhi(lutName_02);
+	int deltaEtaFW_02 = abs(etaIndex0 - etaIndex2);
+	long long deltaEtaLUT_02 = 0;
+	unsigned int precDeltaEtaLUT_02 = 0;
+	deltaEtaLUT_02 = m_gtScales->getLUT_DeltaEta(lutName_02, deltaEtaFW_02);
+	precDeltaEtaLUT_02 = m_gtScales->getPrec_DeltaEta(lutName_02);
+
+	int deltaPhiFW_12 = abs(phiIndex1 - phiIndex2);
+	if (deltaPhiFW_12 >= phiBound) //FIXME: understand better phiBound
+	  deltaPhiFW_12 = 2 * phiBound - deltaPhiFW_12;
+	std::string lutName_12 = lutObj1;
+	lutName_12 += "-";
+	lutName_12 += lutObj2;
+	long long deltaPhiLUT_12 = m_gtScales->getLUT_DeltaPhi(lutName_12, deltaPhiFW_12);
+	unsigned int precDeltaPhiLUT_12 = m_gtScales->getPrec_DeltaPhi(lutName_12);
+	int deltaEtaFW_12 = abs(etaIndex1 - etaIndex2);
+	long long deltaEtaLUT_12 = 0;
+	unsigned int precDeltaEtaLUT_12 = 0;
+	deltaEtaLUT_12 = m_gtScales->getLUT_DeltaEta(lutName_12, deltaEtaFW_12);
+	precDeltaEtaLUT_12 = m_gtScales->getPrec_DeltaEta(lutName_12); 
 	
-	//
-	LogDebug("L1TGlobal") << "Obj0 phiFW = " << phiIndex0 << " Obj1 phiFW = " << phiIndex1 << "\n"
-			      << "    DeltaPhiFW = " << deltaPhiFW << "\n"
-			      << "    LUT Name = " << lutName << " Prec = " << precDeltaPhiLUT
-			      << "  DeltaPhiLUT = " << deltaPhiLUT << "\n"
+	//LogDebug("L1TGlobal") << "Obj0 phiFW = " << phiIndex0 << " Obj1 phiFW = " << phiIndex1 << "\n"
+	std::cout << "EF Obj0 phiFW = " << phiIndex0 << " Obj1 phiFW = " << phiIndex1 << "\n"
+			      << "    DeltaPhiFW = " << deltaPhiFW_01 << "\n"
+			      << "    LUT Name = " << lutName_01 << " Prec = " << precDeltaPhiLUT_01
+			      << "  DeltaPhiLUT = " << deltaPhiLUT_01 << "\n"
 			      << "Obj0 etaFW = " << etaIndex0 << " Obj1 etaFW = " << etaIndex1 << "\n"
-			      << "    DeltaEtaFW = " << deltaEtaFW << "\n"
-			      << "    LUT Name = " << lutName << " Prec = " << precDeltaEtaLUT
-			      << "  DeltaEtaLUT = " << deltaEtaLUT << std::endl;
+			      << "    DeltaEtaFW = " << deltaEtaFW_01 << "\n"
+			      << "    LUT Name 01 = " << lutName_01 << " Prec 01 = " << precDeltaEtaLUT_01
+			      << "    LUT Name 02 = " << lutName_02 << " Prec 02 = " << precDeltaEtaLUT_02
+			      << "    LUT Name 12 = " << lutName_12 << " Prec 12 = " << precDeltaEtaLUT_12
+			      << "  DeltaEtaLUT_01 = " << deltaEtaLUT_01
+			      << "  DeltaEtaLUT_02 = " << deltaEtaLUT_02 
+			      << "  DeltaEtaLUT_12 = " << deltaEtaLUT_12 << std::endl;
 		
 	if (corrPar.corrCutType & 0x8 || corrPar.corrCutType & 0x10) {
-	  //invariant mass calculation based on
+	  //invariant mass calculation based for each pair on
 	  // M = sqrt(2*p1*p2(cosh(eta1-eta2) - cos(phi1 - phi2)))
 	  // but we calculate (1/2)M^2
 	  //
-	  double cosDeltaPhiPhy = cos(deltaPhiPhy);
-	  double coshDeltaEtaPhy = cosh(deltaEtaPhy);
-	  if (corrPar.corrCutType & 0x10)
-	    coshDeltaEtaPhy = 1.;
-	  double massSqPhy = et0Phy * et1Phy * (coshDeltaEtaPhy - cosDeltaPhiPhy);
+	  double cosDeltaPhiPhy_01 = cos(deltaPhiPhy_01);
+	  double coshDeltaEtaPhy_01 = cosh(deltaEtaPhy_01);
+	  if (corrPar.corrCutType & 0x10) coshDeltaEtaPhy_01 = 1.;
+	  double massSqPhy_01 = et0Phy * et1Phy * (coshDeltaEtaPhy_01 - cosDeltaPhiPhy_01);
 	  
-	  long long cosDeltaPhiLUT = m_gtScales->getLUT_DeltaPhi_Cos(lutName, deltaPhiFW);
-	  unsigned int precCosLUT = m_gtScales->getPrec_DeltaPhi_Cos(lutName);
+	  long long cosDeltaPhiLUT_01 = m_gtScales->getLUT_DeltaPhi_Cos(lutName_01, deltaPhiFW_01);
+	  unsigned int precCosLUT_01 = m_gtScales->getPrec_DeltaPhi_Cos(lutName_01);
 	  
-	  long long coshDeltaEtaLUT;
+	  long long coshDeltaEtaLUT_01;
 	  if (corrPar.corrCutType & 0x10) {
-	    coshDeltaEtaLUT = 1 * pow(10, precCosLUT);
+	    coshDeltaEtaLUT_01 = 1 * pow(10, precCosLUT_01);
 	  } else {
-	    coshDeltaEtaLUT = m_gtScales->getLUT_DeltaEta_Cosh(lutName, deltaEtaFW);
-	    unsigned int precCoshLUT = m_gtScales->getPrec_DeltaEta_Cosh(lutName);
-	    if (precCoshLUT - precCosLUT != 0)
+	    coshDeltaEtaLUT_01 = m_gtScales->getLUT_DeltaEta_Cosh(lutName_01, deltaEtaFW_01);
+	    unsigned int precCoshLUT_01 = m_gtScales->getPrec_DeltaEta_Cosh(lutName_01);
+	    if (precCoshLUT_01 - precCosLUT_01 != 0)
 	      LogDebug("L1TGlobal") << "Warning: Cos and Cosh LUTs on different Precision" << std::endl;
 	  }
 	  // if (corrPar.corrCutType & 0x10) coshDeltaEtaLUT=1*pow(10,precCosLUT);
+
+	  double cosDeltaPhiPhy_02 = cos(deltaPhiPhy_02);
+	  double coshDeltaEtaPhy_02 = cosh(deltaEtaPhy_02);
+	  if (corrPar.corrCutType & 0x10) coshDeltaEtaPhy_02 = 1.;
+	  double massSqPhy_02 = et0Phy * et2Phy * (coshDeltaEtaPhy_02 - cosDeltaPhiPhy_02);
+	  long long cosDeltaPhiLUT_02 = m_gtScales->getLUT_DeltaPhi_Cos(lutName_02, deltaPhiFW_02);
+	  unsigned int precCosLUT_02 = m_gtScales->getPrec_DeltaPhi_Cos(lutName_02);
+	  long long coshDeltaEtaLUT_02;
+	  if (corrPar.corrCutType & 0x10) {
+	    coshDeltaEtaLUT_02 = 1 * pow(10, precCosLUT_02);
+	  } else {
+	    coshDeltaEtaLUT_02 = m_gtScales->getLUT_DeltaEta_Cosh(lutName_02, deltaEtaFW_02);
+	    unsigned int precCoshLUT_02 = m_gtScales->getPrec_DeltaEta_Cosh(lutName_02);
+	    if (precCoshLUT_02 - precCosLUT_02 != 0)
+	      LogDebug("L1TGlobal") << "Warning: Cos and Cosh LUTs on different Precision" << std::endl;
+	  }
+
+	  double cosDeltaPhiPhy_12 = cos(deltaPhiPhy_12);
+	  double coshDeltaEtaPhy_12 = cosh(deltaEtaPhy_12);
+	  if (corrPar.corrCutType & 0x10) coshDeltaEtaPhy_12 = 1.;
+	  double massSqPhy_12 = et1Phy * et2Phy * (coshDeltaEtaPhy_12 - cosDeltaPhiPhy_12);
+	  long long cosDeltaPhiLUT_12 = m_gtScales->getLUT_DeltaPhi_Cos(lutName_12, deltaPhiFW_12);
+	  unsigned int precCosLUT_12 = m_gtScales->getPrec_DeltaPhi_Cos(lutName_12);
+	  long long coshDeltaEtaLUT_12;
+	  if (corrPar.corrCutType & 0x10) {
+	    coshDeltaEtaLUT_12 = 1 * pow(10, precCosLUT_12);
+	  } else {
+	    coshDeltaEtaLUT_12 = m_gtScales->getLUT_DeltaEta_Cosh(lutName_12, deltaEtaFW_12);
+	    unsigned int precCoshLUT_12 = m_gtScales->getPrec_DeltaEta_Cosh(lutName_12);
+	    if (precCoshLUT_12 - precCosLUT_12 != 0)
+	      LogDebug("L1TGlobal") << "Warning: Cos and Cosh LUTs on different Precision" << std::endl;
+	  }
 	  
 	  std::string lutName = lutObj0;
 	  lutName += "-ET";
@@ -563,37 +627,46 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
 	  long long ptObj1 = m_gtScales->getLUT_Pt("Mass_" + lutName, etIndex1);
 	  unsigned int precPtLUTObj1 = m_gtScales->getPrec_Pt("Mass_" + lutName);
 
-	  // EF FIXME 
-	  //lutName = lutObj2;
-	  //lutName += "-ET";
-	  //long long ptObj2 = m_gtScales->getLUT_Pt("Mass_" + lutName, etIndex2);
-	  //unsigned int precPtLUTObj2 = m_gtScales->getPrec_Pt("Mass_" + lutName);
+	  lutName = lutObj2;
+	  lutName += "-ET";
+	  long long ptObj2 = m_gtScales->getLUT_Pt("Mass_" + lutName, etIndex2);
+	  unsigned int precPtLUTObj2 = m_gtScales->getPrec_Pt("Mass_" + lutName);
 	  
 	  // Pt and Angles are at different precission.
-	  long long massSq = ptObj0 * ptObj1 * (coshDeltaEtaLUT - cosDeltaPhiLUT);
-	  
+	  long long massSq_01 = ptObj0 * ptObj1 * (coshDeltaEtaLUT_01 - cosDeltaPhiLUT_01);
+	  long long massSq_02 = ptObj0 * ptObj2 * (coshDeltaEtaLUT_02 - cosDeltaPhiLUT_02);
+	  long long massSq_12 = ptObj1 * ptObj2 * (coshDeltaEtaLUT_12 - cosDeltaPhiLUT_12);
+	  //long long massSq = ptObj0 * ptObj1 * (coshDeltaEtaLUT - cosDeltaPhiLUT);
+	  // STUPID TEST: long long massSq = ptObj0 * ptObj0 * (coshDeltaEtaLUT + cosDeltaPhiLUT);
+	  // STUPID TEST: long long massSq = ptObj1 * ptObj1 * (cosDeltaPhiLUT - coshDeltaEtaLUT - coshDeltaEtaLUT);
+	  long long massSq = massSq_01 + massSq_02 + massSq_12;
+
 	  //Note: There is an assumption here that Cos and Cosh have the same precission
-	  unsigned int preShift = precPtLUTObj0 + precPtLUTObj1 + precCosLUT - corrPar.precMassCut;
-	  
+	  //unsigned int preShift_01 = precPtLUTObj0 + precPtLUTObj1 + precCosLUT - corrPar.precMassCut;
+	  unsigned int preShift_01 = precPtLUTObj0 + precPtLUTObj1 + precCosLUT_01 - corrPar.precMassCut;
+	  unsigned int preShift_02 = precPtLUTObj0 + precPtLUTObj2 + precCosLUT_02 - corrPar.precMassCut;
+	  unsigned int preShift_12 = precPtLUTObj1 + precPtLUTObj2 + precCosLUT_12 - corrPar.precMassCut;
+	  unsigned int preShift = preShift_01 + preShift_02 + preShift_12;
+
 	  std::cout << "####################################\n";
 	  //LogDebug("L1TGlobal") << "    Testing Invariant Mass (" << lutObj0 << "," << lutObj1 << ") ["
-	  std::cout << "    Testing Invariant Mass (" << lutObj0 << "," << lutObj1 << ") ["
-		    << (long long)(corrPar.minMassCutValue * pow(10, preShift)) << ","
-		    << (long long)(corrPar.maxMassCutValue * pow(10, preShift))
+	  std::cout << "    Testing Invariant Mass between first two objects (" << lutObj0 << "," << lutObj1 << ") ["
+		    << (long long)(corrPar.minMassCutValue * pow(10, preShift_01)) << ","
+		    << (long long)(corrPar.maxMassCutValue * pow(10, preShift_01))
 		    << "] with precision = " << corrPar.precMassCut << "\n"
-		    << "    deltaPhiLUT  = " << deltaPhiLUT << "  cosLUT  = " << cosDeltaPhiLUT << "\n"
-		    << "    deltaEtaLUT  = " << deltaEtaLUT << "  coshLUT = " << coshDeltaEtaLUT << "\n"
+		    << "    deltaPhiLUT  = " << deltaPhiLUT_01 << "  cosLUT  = " << cosDeltaPhiLUT_01 << "\n"
+		    << "    deltaEtaLUT  = " << deltaEtaLUT_01 << "  coshLUT = " << coshDeltaEtaLUT_01 << "\n"
 		    << "    etIndex0     = " << etIndex0 << "    pt0LUT      = " << ptObj0
 		    << " PhyEt0 = " << et0Phy << "\n"
 		    << "    etIndex1     = " << etIndex1 << "    pt1LUT      = " << ptObj1
 		    << " PhyEt1 = " << et1Phy << "\n"
-		    << "    massSq/2     = " << massSq << "\n"
-		    << "    Precision Shift = " << preShift << "\n"
-		    << "    massSq   (shift)= " << (massSq / pow(10, preShift + corrPar.precMassCut)) << "\n"
-		    << "    deltaPhiPhy  = " << deltaPhiPhy << "  cos() = " << cosDeltaPhiPhy << "\n"
-		    << "    deltaEtaPhy  = " << deltaEtaPhy << "  cosh()= " << coshDeltaEtaPhy << "\n"
-		    << "    massSqPhy/2  = " << massSqPhy
-		    << "  sqrt(|massSq|) = " << sqrt(fabs(2. * massSqPhy)) << std::endl;
+		    << "    massSq/2     = " << massSq_01 << "\n"
+		    << "    Precision Shift = " << preShift_01 << "\n"
+		    << "    massSq   (shift)= " << (massSq_01 / pow(10, preShift_01 + corrPar.precMassCut)) << "\n"
+		    << "    deltaPhiPhy  = " << deltaPhiPhy_01 << "  cos() = " << cosDeltaPhiPhy_01 << "\n"
+		    << "    deltaEtaPhy  = " << deltaEtaPhy_01 << "  cosh()= " << coshDeltaEtaPhy_01 << "\n"
+		    << "    massSqPhy/2  = " << massSqPhy_01
+		    << "  sqrt(|massSq|) = " << sqrt(fabs(2. * massSqPhy_01)) << std::endl;
 	  
 	  
 	  //if(preShift>0) massSq /= pow(10,preShift);
@@ -616,6 +689,7 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
 	if (reqResult) {
 	  condResult = true;
 	  (combinationsInCond()).push_back(objectsInComb);
+
 	}
 	
       }  //end loop over third leg
