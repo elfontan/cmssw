@@ -444,6 +444,7 @@ void l1t::GlobalBoard::runGTL(edm::Event& iEvent,
   const GlobalScales& gtScales = m_l1GtMenu->gtScales();
   const std::string scaleSetName = gtScales.getScalesName();
   LogDebug("L1TGlobal") << " L1 Menu Scales -- Set Name: " << scaleSetName << std::endl;
+  std::cout << "EF (BlobalBoard) 1" << std::endl;
 
   // Reset AlgBlk for this bx
   m_uGtAlgBlk.reset();
@@ -453,6 +454,7 @@ void l1t::GlobalBoard::runGTL(edm::Event& iEvent,
   m_algFinalOr = false;
   m_algFinalOrVeto = false;
 
+  std::cout << "EF (BlobalBoard) 2" << std::endl;
   const std::vector<std::vector<MuonTemplate>>& corrMuon = m_l1GtMenu->corMuonTemplate();
 
   // Comment out for now
@@ -469,8 +471,10 @@ void l1t::GlobalBoard::runGTL(edm::Event& iEvent,
 
   // never happens in production but at first event...
   if (m_conditionResultMaps.size() != conditionMap.size()) {
+    std::cout << "EF (GlobalBoard) conditionMap.size() = " << conditionMap.size() << "; m_conditionResultMaps.size() = " << m_conditionResultMaps.size() << std::endl;
     m_conditionResultMaps.clear();
     m_conditionResultMaps.resize(conditionMap.size());
+    std::cout << "EF (GlobalBoard) m_conditionResultMaps.size() = " << m_conditionResultMaps.size() << std::endl;
   }
 
   int iChip = -1;
@@ -479,8 +483,14 @@ void l1t::GlobalBoard::runGTL(edm::Event& iEvent,
        itCondOnChip != conditionMap.end();
        itCondOnChip++) {
     iChip++;
+    std::cout << "EF (GlobalBoard) 3, Chip is " << iChip << std::endl;
 
     AlgorithmEvaluation::ConditionEvaluationMap& cMapResults = m_conditionResultMaps[iChip];
+
+    std::cout << "EF (GlobalBoard) 4" << std::endl;
+    std::ostringstream EFCout;
+    ( ( ( *conditionMap.begin() ).begin() )->second )->print(EFCout);
+    std::cout << "EF (GlobalBoard) 5 " << EFCout.str() << std::endl;
 
     for (CItCond itCond = itCondOnChip->begin(); itCond != itCondOnChip->end(); itCond++) {
       // evaluate condition
@@ -495,7 +505,7 @@ void l1t::GlobalBoard::runGTL(edm::Event& iEvent,
 
           muCondition->evaluateConditionStoreResult(iBxInEvent);
 
-          // BLW COmment out for now
+          // BLW Comment out for now
           cMapResults[itCond->first] = muCondition;
 
           if (m_verbosity && m_isDebugEnabled) {
@@ -800,6 +810,16 @@ void l1t::GlobalBoard::runGTL(edm::Event& iEvent,
   for (CItAlgo itAlgo = algorithmMap.begin(); itAlgo != algorithmMap.end(); itAlgo++) {
     AlgorithmEvaluation gtAlg(itAlgo->second);
     gtAlg.evaluateAlgorithm((itAlgo->second).algoChipNumber(), m_conditionResultMaps);
+
+    std::cout << "EF (GlobalBoard) gtAlg.evaluateAlgorithm( (itAlgo->second).algoChipNumber(), m_conditionResultMaps );" << std::endl;
+    std::cout << "EF (GlobalBoard) itAlgo->second = " << itAlgo->second << std::endl;
+    std::cout << "EF (GlobalBoard) m_conditionResultMaps.size() = " << m_conditionResultMaps.size() << std::endl;
+
+    if( m_conditionResultMaps[ (itAlgo->second).algoChipNumber() ].begin()->second != NULL )
+      std::cout << "EF (GlobalBoard) m_conditionResultMaps[ (itAlgo->second).algoChipNumber() ] != NULL " << std::endl;
+    else
+      std::cout << "EF (GlobalBoard) m_conditionResultMaps[ (itAlgo->second).algoChipNumber() ] == NULL" << std::endl;
+    std::cout << "EF (GlobalBoard) m_conditionResultMaps = " << m_conditionResultMaps[ (itAlgo->second).algoChipNumber() ].begin()->second << std::endl;
 
     int algBitNumber = (itAlgo->second).algoBitNumber();
     bool algResult = gtAlg.gtAlgoResult();

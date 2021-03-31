@@ -82,10 +82,10 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
   // std::cout << "m_isDebugEnabled = " << m_isDebugEnabled << std::endl;
   // std::cout << "m_verbosity = " << m_verbosity << std::endl;
 
-  //std::ostringstream myCout;
-  //m_gtCorrelationThreeBodyTemplate->print(myCout); 
+  std::ostringstream myCout; //EF
+  m_gtCorrelationThreeBodyTemplate->print(myCout);  //EF
   //LogDebug("L1TGlobal")
-  std::cout << "EF Three-body Correlation Condition Evaluation" << std::endl; 
+  std::cout << "EF Three-body Correlation Condition Evaluation..." << std::endl; 
 
   bool condResult = false;
   bool reqObjResult = false;
@@ -115,67 +115,75 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
   // FIRST OBJECT
   //switch (cond0Categ) {
   if (cond0Categ == CondMuon) {
-      corrMuon = static_cast<const MuonTemplate*>(m_gtCond0);
-      MuCondition muCondition(
-			      corrMuon, m_uGtB, 0, 0);  //BLW these are counts that don't seem to be used...perhaps remove
-      
-      muCondition.evaluateConditionStoreResult(bxEval);
-      reqObjResult = muCondition.condLastResult();
-      
-      cond0Comb = (muCondition.getCombinationsInCond());
-      cond0bx = bxEval + (corrMuon->condRelativeBx());
-      cndObjTypeVec[0] = (corrMuon->objectType())[0];
-      
-      if (m_verbosity) {
-        std::ostringstream myCout;
-        muCondition.print(myCout);
-	
-        LogDebug("L1TGlobal") << myCout.str() << std::endl;
-      }
-    } //break;
+    std::cout << "EF (Three-body Correlation) First muon checks 1" << std::endl; 
+    corrMuon = static_cast<const MuonTemplate*>(m_gtCond0);
+    MuCondition muCondition(
+			    corrMuon, m_uGtB, 0, 0);  //BLW these are counts that don't seem to be used...perhaps remove
+    std::cout << "EF (Three-body Correlation) First muon checks 2: before .evaluateConditionStoreResult" << std::endl;     
+    muCondition.evaluateConditionStoreResult(bxEval);
+    std::cout << "EF (Three-body Correlation) First muon checks 3: after evaluateConditionStoreResult " << std::endl; 
+    reqObjResult = muCondition.condLastResult();
+    std::cout << "EF (Three-body Correlation) First muon checks 4: reqObjResult = " << std::endl; 
+
+    cond0Comb = (muCondition.getCombinationsInCond());
+    cond0bx = bxEval + (corrMuon->condRelativeBx());
+    cndObjTypeVec[0] = (corrMuon->objectType())[0];
+    std::cout << "EF (Three-body Correlation) First muon checks 5: muCondition.getCombinationsInCond" << std::endl; 
+    
+    //EF if (m_verbosity) {
+    std::ostringstream myCout;
+    muCondition.print(myCout);
+    std::cout << myCout.str() << std::endl;
+      //LogDebug("L1TGlobal") << myCout.str() << std::endl;
+      //EF }
+  } //break;
   
   else {
-      // Interested only in three-muon correlations
-      LogDebug("L1TGlobal") << "CondMuon not satisfied for Leg 0" << std::endl;
-      return false;
-    } //break;
+    // Interested only in three-muon correlations
+    std::cout << "CondMuon not satisfied for Leg 0" << std::endl;
+    //LogDebug("L1TGlobal") << "CondMuon not satisfied for Leg 0" << std::endl;
+    return false;
+  } //break;
   //} //Switch removed
   
   // return if first subcondition is false
   if (!reqObjResult) {
-    LogDebug("L1TGlobal") << "\n  First sub-condition false, second sub-condition not evaluated and not printed."
+    std::cout << "\n  First sub-condition false, second sub-condition not evaluated and not printed."
+      //LogDebug("L1TGlobal") << "\n  First sub-condition false, second sub-condition not evaluated and not printed."
                           << std::endl;
     return false;
   }
-
+  
   // SECOND OBJECT
   reqObjResult = false;
 
   //switch (cond1Categ) {
   if (cond1Categ == CondMuon) {
-      corrMuon = static_cast<const MuonTemplate*>(m_gtCond1);
-      MuCondition muCondition(
-			      corrMuon, m_uGtB, 0, 0);  //BLW these are counts that don't seem to be used...perhaps remove
+    std::cout << "EF (Three-body Correlation) Second muon checks" << std::endl; 
+    corrMuon = static_cast<const MuonTemplate*>(m_gtCond1);
+    MuCondition muCondition(
+			    corrMuon, m_uGtB, 0, 0);  //BLW these are counts that don't seem to be used...perhaps remove
+    
+    muCondition.evaluateConditionStoreResult(bxEval);
+    reqObjResult = muCondition.condLastResult();
+    
+    cond1Comb = (muCondition.getCombinationsInCond());
+    cond1bx = bxEval + (corrMuon->condRelativeBx());
+    
+    cndObjTypeVec[1] = (corrMuon->objectType())[0];
+    
+    if (m_verbosity) {
+      std::ostringstream myCout;
+      muCondition.print(myCout);
       
-      muCondition.evaluateConditionStoreResult(bxEval);
-      reqObjResult = muCondition.condLastResult();
-      
-      cond1Comb = (muCondition.getCombinationsInCond());
-      cond1bx = bxEval + (corrMuon->condRelativeBx());
-      
-      cndObjTypeVec[1] = (corrMuon->objectType())[0];
-      
-      if (m_verbosity) {
-        std::ostringstream myCout;
-        muCondition.print(myCout);
-	
-        LogDebug("L1TGlobal") << myCout.str() << std::endl;
-      }
-    } //break;
+      LogDebug("L1TGlobal") << myCout.str() << std::endl;
+    }
+  } //break;
   
   else {
     // Interested only in three-muon correlations
-    LogDebug("L1TGlobal") << "CondMuon not satisfied for Leg 1" << std::endl;
+    std::cout << "CondMuon not satisfied for Leg 1" << std::endl;
+    //LogDebug("L1TGlobal") << "CondMuon not satisfied for Leg 1" << std::endl;
     return false;
   } //break;
   //} //Switch removed
@@ -191,36 +199,39 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
   reqObjResult = false;
 
   if (cond2Categ == CondMuon) {
-      corrMuon = static_cast<const MuonTemplate*>(m_gtCond2);
-      MuCondition muCondition(
-			      corrMuon, m_uGtB, 0, 0);  //BLW these are counts that don't seem to be used...perhaps remove
-      
-      muCondition.evaluateConditionStoreResult(bxEval);
-      reqObjResult = muCondition.condLastResult();
-      
-      cond2Comb = (muCondition.getCombinationsInCond());
-      cond2bx = bxEval + (corrMuon->condRelativeBx()); 
-      
-      cndObjTypeVec[2] = (corrMuon->objectType())[0];
-      
-      if (m_verbosity) {
-        std::ostringstream myCout;
-        muCondition.print(myCout);
-        LogDebug("L1TGlobal") << myCout.str() << std::endl;
-      }
+    std::cout << "EF (Three-body Correlation) Third muon loop" << std::endl; 
+    corrMuon = static_cast<const MuonTemplate*>(m_gtCond2);
+    MuCondition muCondition(
+			    corrMuon, m_uGtB, 0, 0);  //BLW these are counts that don't seem to be used...perhaps remove
+    
+    muCondition.evaluateConditionStoreResult(bxEval);
+    reqObjResult = muCondition.condLastResult();
+    
+    cond2Comb = (muCondition.getCombinationsInCond());
+    cond2bx = bxEval + (corrMuon->condRelativeBx()); 
+    
+    cndObjTypeVec[2] = (corrMuon->objectType())[0];
+    
+    if (m_verbosity) {
+      std::ostringstream myCout;
+      muCondition.print(myCout);
+      LogDebug("L1TGlobal") << myCout.str() << std::endl;
     }
+  }
   
   else {
-      // Interested only in three-muon correlations
-      LogDebug("L1TGlobal") << "CondMuon not satisfied for Leg 2" << std::endl;
-      return false;
-    } 
-
+    // Interested only in three-muon correlations
+    std::cout << "CondMuon not satisfied for Leg 2" << std::endl;
+    //LogDebug("L1TGlobal") << "CondMuon not satisfied for Leg 2" << std::endl;
+    return false;
+  } 
+  
   // return if third subcondition is false
   if (!reqObjResult) {
     return false;
   } else {
-    LogDebug("L1TGlobal") << "\n"
+    std::cout << "\n"
+      //LogDebug("L1TGlobal") << "\n"
                           << "    All subconditions true for object requirements."
                           << "    Evaluate three-body correlation requirements.\n"
                           << std::endl;
