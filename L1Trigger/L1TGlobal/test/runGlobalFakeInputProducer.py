@@ -66,8 +66,8 @@ process.MessageLogger.l1t_debug.l1t.limit = cms.untracked.int32(100000)
 
 process.MessageLogger.categories.append('l1t|Global')
 #process.MessageLogger.debugModules = cms.untracked.vstring('*')     
-process.MessageLogger.debugModules = cms.untracked.vstring('simGtStage2Digis') # ADDED: DEBUG
-process.MessageLogger.cerr.threshold = cms.untracked.string('DEBUG') # ADDED: DEBUG
+process.MessageLogger.debugModules = cms.untracked.vstring('simGtStage2Digis') # EF: DEBUG
+process.MessageLogger.cerr.threshold = cms.untracked.string('DEBUG') # EF: DEBUG
 ##########################################################
 #process.MessageLogger = cms.Service(
 #    "MessageLogger",
@@ -84,15 +84,18 @@ process.MessageLogger.cerr.threshold = cms.untracked.string('DEBUG') # ADDED: DE
 
 # set the number of events
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
-    #input = cms.untracked.int32(neventsPerJob)
+    #input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(neventsPerJob)
     )
 
 # Input source
 process.source = cms.Source("PoolSource",
     secondaryFileNames = cms.untracked.vstring(),
     fileNames = cms.untracked.vstring(
-        "/store/mc/RunIIFall15DR76/TT_TuneCUETP8M1_13TeV-powheg-pythia8/AODSIM/25nsFlat10to25TSG_76X_mcRun2_asymptotic_v11_ext3-v1/20000/F03B8956-5D87-E511-8AE9-002590D0AFFC.root",
+        "/store/mc/RunIISummer20UL18RECO/DsToTau_To3Mu_MuFilter_TuneCP5_13TeV-pythia8-evtgen/AODSIM/106X_upgrade2018_realistic_v11_L1v1-v1/00000/0003B7FD-6C1E-BF4C-8DA9-BA8A27AF0290.root",
+        #"/store/mc/RunIISummer19UL18RECO/ZZ_TuneCP5_13TeV-pythia8/AODSIM/106X_upgrade2018_realistic_v11_L1v1-v2/280000/8FB9C543-0411-3D4A-881E-C3D394D96B39.root",
+        #"/store/mc/RunIISummer20UL18RECO/WZTo3LNu_mllmin01_NNPDF31_TuneCP5_13TeV_powheg_pythia8/AODSIM/106X_upgrade2018_realistic_v11_L1v1-v2/260002/12BC2BDE-D37E-4047-951A-A9179D7B2C2B.root",
+        #"/store/mc/RunIIFall15DR76/TT_TuneCUETP8M1_13TeV-powheg-pythia8/AODSIM/25nsFlat10to25TSG_76X_mcRun2_asymptotic_v11_ext3-v1/20000/F03B8956-5D87-E511-8AE9-002590D0AFFC.root",
         #"/store/mc/RunIISummer19UL18HLT/TTTo2L2Nu_mtop178p5_TuneCP5_13TeV-powheg-pythia8/GEN-SIM-RAW/102X_upgrade2018_realistic_v15-v2/280000/00429618-85B5-124F-9C16-0C9F07A39E73.root+"
         #"/store/mc/RunIISummer19UL18HLT/TTTo2L2Nu_mtop166p5_TuneCP5_13TeV-powheg-pythia8/GEN-SIM-RAW/102X_upgrade2018_realistic_v15-v2/100000/229B20D3-D84D-1D49-B6A2-7571D57C2350.root",
         #"/store/mc/RunIISummer19UL18HLT/TTTo2L2Nu_mtop166p5_TuneCP5_13TeV-powheg-pythia8/GEN-SIM-RAW/102X_upgrade2018_realistic_v15-v2/100000/10B681E2-1C34-E446-9807-720A20AA2309.root",
@@ -105,15 +108,6 @@ process.source = cms.Source("PoolSource",
         ## "/store/mc/RunIISpring16DR80/TT_TuneCUETP8M1_13TeV-powheg-pythia8/GEN-SIM-RAW/FlatPU20to70HcalNZSRAW_withHLT_80X_mcRun2_asymptotic_v14_ext3-v1/50000/DACA98C0-9A65-E611-8626-0025905C54C6.root"
         #"/store/user/puigh/L1Upgrade/GEN-SIM-DIGI-RAW-HLTDEBUG/CMSSW_7_6_0/4C462F65-9F7F-E511-972A-0026189438A9.root",
         #"/store/relval/CMSSW_7_6_0_pre7/RelValTTbar_13/GEN-SIM/76X_mcRun2_asymptotic_v9_realBS-v1/00000/0A812333-427C-E511-A80A-0025905964A2.root",
-        #"root://xrootd.ba.infn.it//store/relval/CMSSW_7_6_0/RelValTTbar_13/GEN-SIM-DIGI-RAW-HLTDEBUG/76X_mcRun2_asymptotic_v11-v1/00000/4C462F65-9F7F-E511-972A-0026189438A9.root",
-        #"root://xrootd.ba.infn.it//store/relval/CMSSW_7_6_0/RelValTTbar_13/GEN-SIM-DIGI-RAW-HLTDEBUG/76X_mcRun2_asymptotic_v11-v1/00000/703E7EAB-9D7F-E511-B886-003048FFCBFC.root",
-        #"root://xrootd.ba.infn.it//store/relval/CMSSW_7_6_0/RelValTTbar_13/GEN-SIM-DIGI-RAW-HLTDEBUG/76X_mcRun2_asymptotic_v11-v1/00000/8AF07AAB-9D7F-E511-B8B4-003048FFCBFC.root",
-        #"root://xrootd.ba.infn.it//store/relval/CMSSW_7_6_0/RelValTTbar_13/GEN-SIM-DIGI-RAW-HLTDEBUG/76X_mcRun2_asymptotic_v11-v1/00000/962BEF7C-9D7F-E511-A2BB-0025905B85AA.root",
-        #"root://xrootd.ba.infn.it//store/relval/CMSSW_7_6_0/RelValTTbar_13/GEN-SIM-DIGI-RAW-HLTDEBUG/76X_mcRun2_asymptotic_v11-v1/00000/C409A519-9E7F-E511-BD4C-0025905B8590.root",
-        #"root://xrootd.ba.infn.it//store/relval/CMSSW_7_6_0/RelValTTbar_13/GEN-SIM-DIGI-RAW-HLTDEBUG/76X_mcRun2_asymptotic_v11-v1/00000/E8D41D6A-9F7F-E511-A10A-003048FFD740.root",
-        #"root://xrootd.ba.infn.it//store/relval/CMSSW_7_6_0/RelValTTbar_13/GEN-SIM-DIGI-RAW-HLTDEBUG/76X_mcRun2_asymptotic_v11-v1/00000/EE048767-9E7F-E511-B1AA-0025905B8606.root",
-        #"root://xrootd.ba.infn.it//store/relval/CMSSW_7_6_0/RelValTTbar_13/GEN-SIM-DIGI-RAW-HLTDEBUG/76X_mcRun2_asymptotic_v11-v1/00000/4431031E-9E7F-E511-9F42-0025905938A4.root",
-        #"root://cmsxrootd.fnal.gov//store/relval/CMSSW_7_6_0/RelValTTbar_13/GEN-SIM-DIGI-RAW-HLTDEBUG/76X_mcRun2_asymptotic_v11-v1/00000/4431031E-9E7F-E511-9F42-0025905938A4.root",
 	),
     skipEvents = cms.untracked.uint32(skip)
     )
@@ -123,7 +117,9 @@ process.output =cms.OutputModule("PoolOutputModule",
 	fileName = cms.untracked.string('testGlobalMCInputProducer_'+repr(job)+'.root')
 	)
 
-process.options = cms.untracked.PSet()
+process.options = cms.untracked.PSet(
+    wantSummary = cms.bool(True)
+)
 
 
 # Additional output definition
@@ -134,6 +130,7 @@ process.TFileService.fileName = cms.string('l1t_histos.root')
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
 ## process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS1', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '106X_upgrade2018_realistic_v11', '')
 process.GlobalTag = GlobalTag(process.GlobalTag, '112X_mcRun2_asymptotic_v2', '')
 ## process.GlobalTag = GlobalTag(process.GlobalTag, '90X_upgrade2017_realistic_PerfectEcalIc_EGM_PFCalib', '')
 ## auto:upgradePLS1
@@ -237,22 +234,12 @@ process.load('L1Trigger.L1TGlobal.GlobalParameters_cff')
 
 process.load("L1Trigger.L1TGlobal.TriggerMenu_cff")
 
-## process.TriggerMenu.L1TriggerMenuFile = cms.string('L1Menu_Collisions2016_v2c.xml')
-## process.TriggerMenu.L1TriggerMenuFile = cms.string('towercount.xml')
-## process.TriggerMenu.L1TriggerMenuFile = cms.string('L1Menu_Collisions2016_v3_HIDilepton_v5.xml')
-## process.TriggerMenu.L1TriggerMenuFile = cms.string('L1Menu_HeavyIons2016_v0.xml')
-## process.TriggerMenu.L1TriggerMenuFile = cms.string('L1Menu_HeavyIons2016_v2.xml')
-## process.TriggerMenu.L1TriggerMenuFile = cms.string('L1Menu_HeavyIons2016_v3_m2.xml')
-## process.TriggerMenu.L1TriggerMenuFile = cms.string('L1Menu_Collisions2016_v8_m2.xml')
-## process.TriggerMenu.L1TriggerMenuFile = cms.string('L1Menu_test_mass_trv.xml')
-
-xmlMenu="L1Menu_test_mass_3_body.xml"
-#xmlMenu="L1Menu_Collisions2020_v0_1_2.xml"
+xmlMenu="L1Menu_test_mass_3_body_reduced_v2.xml"
 process.TriggerMenu.L1TriggerMenuFile = cms.string(xmlMenu)
 process.ESPreferL1TXML = cms.ESPrefer("L1TUtmTriggerMenuESProducer","TriggerMenu")
 
 # INFO about names and types of algos parsed by the emulator from the menu
-process.menuDumper = cms.EDAnalyzer("L1TUtmTriggerMenuDumper")
+process.menuDumper = cms.EDAnalyzer("L1TUtmTriggerMenuDumper") # EF: DEBUG
 process.dumpMenu = cms.EDAnalyzer("L1MenuViewer")
 
 ## Fill External conditions
@@ -296,9 +283,9 @@ process.dumpGTRecord = cms.EDAnalyzer("l1t::GtRecordDump",
 		maxBxVec       = cms.int32(0),
 		dumpGTRecord   = cms.bool(True),
 		dumpGTObjectMap= cms.bool(False),
-                dumpTrigResults= cms.bool(False),
+                dumpTrigResults= cms.bool(True), #EF
 		dumpVectors    = cms.bool(True),
-		tvFileName     = cms.string( ("TestVector_3BodyMenu_TT_TuneCUETP8M1_RunIIFall15DR76_%03d.txt") % job ),
+		tvFileName     = cms.string( ("TestVector_3BodyMenu_ZZ_TuneCP5_13TeV_%03d.txt") % job ),
 		tvVersion      = cms.int32(3),
                 ReadPrescalesFromFile = cms.bool(True),
                 psFileName     = cms.string( "prescale_L1TGlobal.csv" ),
@@ -359,7 +346,7 @@ process.newDumpGTRecord = cms.EDAnalyzer("l1t::GtRecordDump",
 		maxBxVec       = cms.int32(0),
 		dumpGTRecord   = cms.bool(True),
 		dumpGTObjectMap= cms.bool(True),
-                dumpTrigResults= cms.bool(False),
+                dumpTrigResults= cms.bool(True), #EF
 		dumpVectors    = cms.bool(False),
 		tvFileName     = cms.string( ("TestVector_%03d.txt") % job ),
                 ReadPrescalesFromFile = cms.bool(False),
