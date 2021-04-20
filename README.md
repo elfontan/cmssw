@@ -24,6 +24,6 @@ Focus on L1Trigger/L1TriggerGlobal
    ```
    L1 Trigger menu currently used for tests is: 
    ```
-   L1Trigger/L1TGlobal/data/Luminosity/startup/L1Menu_test_mass_3_body_reduced.xml 
+   L1Trigger/L1TGlobal/data/Luminosity/startup/L1Menu_test_mass_3_body_reduced_v2.xml 
    ```
    It contains four algorithms for three-muon events with different conditions.

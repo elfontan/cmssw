@@ -65,26 +65,13 @@ process.load('L1Trigger/L1TGlobal/debug_messages_cfi')
 process.MessageLogger.l1t_debug.l1t.limit = cms.untracked.int32(100000)
 
 process.MessageLogger.categories.append('l1t|Global')
-#process.MessageLogger.debugModules = cms.untracked.vstring('*')     
-process.MessageLogger.debugModules = cms.untracked.vstring('simGtStage2Digis') # EF: DEBUG
-process.MessageLogger.cerr.threshold = cms.untracked.string('DEBUG') # EF: DEBUG
-##########################################################
-#process.MessageLogger = cms.Service(
-#    "MessageLogger",
-#    destinations = cms.untracked.vstring(
-#        'detailedInfo',
-#        'critical'
-#         ),
-#    detailedInfo = cms.untracked.PSet(
-#        threshold  = cms.untracked.string('DEBUG') 
-#         ),
-#    debugModules = cms.untracked.vstring('L1TGlobal')
-#    )
-##########################################################
+# DEBUG
+#process.MessageLogger.debugModules = cms.untracked.vstring('simGtStage2Digis') 
+#process.MessageLogger.cerr.threshold = cms.untracked.string('DEBUG') 
 
 # set the number of events
 process.maxEvents = cms.untracked.PSet(
-    #input = cms.untracked.int32(1000)
+    #input = cms.untracked.int32(10)
     input = cms.untracked.int32(neventsPerJob)
     )
 
@@ -93,7 +80,8 @@ process.source = cms.Source("PoolSource",
     secondaryFileNames = cms.untracked.vstring(),
     fileNames = cms.untracked.vstring(
         "/store/mc/RunIISummer20UL18RECO/DsToTau_To3Mu_MuFilter_TuneCP5_13TeV-pythia8-evtgen/AODSIM/106X_upgrade2018_realistic_v11_L1v1-v1/00000/0003B7FD-6C1E-BF4C-8DA9-BA8A27AF0290.root",
-        #"/store/mc/RunIISummer19UL18RECO/ZZ_TuneCP5_13TeV-pythia8/AODSIM/106X_upgrade2018_realistic_v11_L1v1-v2/280000/8FB9C543-0411-3D4A-881E-C3D394D96B39.root",
+        #"/store/mc/RunIISummer19UL18RECO/GluGluToContinToZZTo4mu_13TeV_MCFM701_pythia8/AODSIM/106X_upgrade2018_realistic_v11_L1v1-v2/110000/664BBEBB-93A9-5B40-AD9C-DE835A79B712.root",
+        #"/store/mc/RunIISummer19UL18RECO/ZZ_TuneCP5_13TeV-pythia8/AODSIM/106X_upgrade2018_realistic_v11_L1v1-v2/280000/04530FC4-E54D-D34A-950E-9F300321E037.root",
         #"/store/mc/RunIISummer20UL18RECO/WZTo3LNu_mllmin01_NNPDF31_TuneCP5_13TeV_powheg_pythia8/AODSIM/106X_upgrade2018_realistic_v11_L1v1-v2/260002/12BC2BDE-D37E-4047-951A-A9179D7B2C2B.root",
         #"/store/mc/RunIIFall15DR76/TT_TuneCUETP8M1_13TeV-powheg-pythia8/AODSIM/25nsFlat10to25TSG_76X_mcRun2_asymptotic_v11_ext3-v1/20000/F03B8956-5D87-E511-8AE9-002590D0AFFC.root",
         #"/store/mc/RunIISummer19UL18HLT/TTTo2L2Nu_mtop178p5_TuneCP5_13TeV-powheg-pythia8/GEN-SIM-RAW/102X_upgrade2018_realistic_v15-v2/280000/00429618-85B5-124F-9C16-0C9F07A39E73.root+"
@@ -238,8 +226,8 @@ xmlMenu="L1Menu_test_mass_3_body_reduced_v2.xml"
 process.TriggerMenu.L1TriggerMenuFile = cms.string(xmlMenu)
 process.ESPreferL1TXML = cms.ESPrefer("L1TUtmTriggerMenuESProducer","TriggerMenu")
 
-# INFO about names and types of algos parsed by the emulator from the menu
-process.menuDumper = cms.EDAnalyzer("L1TUtmTriggerMenuDumper") # EF: DEBUG
+# DEBUG: Information about names and types of algos parsed by the emulator from the menu
+#process.menuDumper = cms.EDAnalyzer("L1TUtmTriggerMenuDumper") 
 process.dumpMenu = cms.EDAnalyzer("L1MenuViewer")
 
 ## Fill External conditions
@@ -285,7 +273,7 @@ process.dumpGTRecord = cms.EDAnalyzer("l1t::GtRecordDump",
 		dumpGTObjectMap= cms.bool(False),
                 dumpTrigResults= cms.bool(True), #EF
 		dumpVectors    = cms.bool(True),
-		tvFileName     = cms.string( ("TestVector_3BodyMenu_ZZ_TuneCP5_13TeV_%03d.txt") % job ),
+		tvFileName     = cms.string( ("TestVector_3BodyMenu_ZZTo4mu_TuneCP5_13TeV_%03d.txt") % job ),
 		tvVersion      = cms.int32(3),
                 ReadPrescalesFromFile = cms.bool(True),
                 psFileName     = cms.string( "prescale_L1TGlobal.csv" ),
@@ -321,7 +309,8 @@ process.gtStage2Raw.MuonInputTag = cms.InputTag("gtInput")
 process.load('EventFilter.L1TRawToDigi.gtStage2Digis_cfi')
 process.newGtStage2Digis = process.gtStage2Digis.clone()
 process.newGtStage2Digis.InputLabel = cms.InputTag('gtStage2Raw')
-process.newGtStage2Digis.debug = cms.untracked.bool(True) # EF: DEBUG 
+# DEBUG 
+process.newGtStage2Digis.debug = cms.untracked.bool(True) 
 
 process.dumpRaw = cms.EDAnalyzer(
     "DumpFEDRawDataProduct",
@@ -392,7 +381,7 @@ process.p1 = cms.Path(
 
 ## Analysis/Dumping
     *process.l1tGlobalAnalyzer
-    *process.menuDumper # EF: DEBUG -> to activate the menuDumper
+#    *process.menuDumper # DEBUG -> to activate the menuDumper
 #    *process.debug
 #    *process.dumpED
 #    *process.dumpES

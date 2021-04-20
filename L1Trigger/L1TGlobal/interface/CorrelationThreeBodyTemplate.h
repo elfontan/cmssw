@@ -26,9 +26,10 @@
 
 //   base class
 #include "L1Trigger/L1TGlobal/interface/GlobalCondition.h"
-
 #include "L1Trigger/L1TGlobal/interface/GlobalDefinitions.h"
+
 // forward declarations
+
 
 // class declaration
 class CorrelationThreeBodyTemplate : public GlobalCondition {
@@ -41,10 +42,8 @@ public:
   CorrelationThreeBodyTemplate(const std::string&);
 
 
-  ///   from condition name, the category of first subcondition, 
-  ///   the category of the second subcondition, the category of third subcondition, the index of first subcondition in the cor* vector,                                          
-  ///   the index of second sub-condition in the cor* vector, the index of second sub-condition in the cor* vector                                          
-  //CorrelationThreeBodyTemplate(const std::string&, const l1t::GtConditionCategory&, const l1t::GtConditionCategory&, const int, const int);
+  ///   from condition name, the category of first, second, and third subcondition, 
+  ///   the index of first, second, third subcondition in the cor* vector
   CorrelationThreeBodyTemplate(const std::string&,
                                         const l1t::GtConditionCategory&,
                                         const l1t::GtConditionCategory&,
@@ -64,7 +63,7 @@ public:
   CorrelationThreeBodyTemplate& operator=(const CorrelationThreeBodyTemplate&);
 
 public:
-  /// typedef for correlation parameters
+  /// typedef for correlation three-body parameters
   struct CorrelationThreeBodyParameter {
     //Cut values in hardware
     long long minEtaCutValue;
@@ -75,26 +74,15 @@ public:
     long long maxPhiCutValue;
     unsigned int precPhiCut;
 
-    long long minDRCutValue;
-    long long maxDRCutValue;
-    unsigned int precDRCut;
-
     long long minMassCutValue;
     long long maxMassCutValue;
     unsigned int precMassCut;
-
-    long long minTBPTCutValue;
-    long long maxTBPTCutValue;
-    unsigned int precTBPTCut;
-
-    //Requirement on charge of legs (currently only Mu-Mu).
-    unsigned int chargeCorrelation;
 
     int corrCutType;
   };
 
 public:
-  /// get / set the category of the two sub-conditions
+  /// get / set the category of the three subconditions
   inline const l1t::GtConditionCategory cond0Category() const { return m_cond0Category; }
   inline const l1t::GtConditionCategory cond1Category() const { return m_cond1Category; }
   inline const l1t::GtConditionCategory cond2Category() const { return m_cond2Category; }
@@ -103,7 +91,7 @@ public:
   void setCond1Category(const l1t::GtConditionCategory&);
   void setCond2Category(const l1t::GtConditionCategory&);
 
-  /// get / set the index of the two sub-conditions in the cor* vector from menu
+  /// get / set the index of the three subconditions in the cor* vector from menu
   inline const int cond0Index() const { return m_cond0Index; }
   inline const int cond1Index() const { return m_cond1Index; }
   inline const int cond2Index() const { return m_cond2Index; }
@@ -113,10 +101,9 @@ public:
   void setCond2Index(const int&);
 
   /// get / set correlation parameters
-
-  inline const CorrelationThreeBodyParameter* correlationParameter() const { return &m_correlationParameter; }
-
+  inline const CorrelationThreeBodyParameter* correlationThreeBodyParameter() const { return &m_correlationThreeBodyParameter; }
   void setCorrelationThreeBodyParameter(const CorrelationThreeBodyParameter& corrParameter);
+  //void setCorrelationThreeBodyParameter(const CorrelationThreeBodyParameter& corrThreeBodyParameter);
 
   /// print the condition
   void print(std::ostream& myCout) const override;
@@ -135,7 +122,7 @@ private:
   int m_cond0Index;
   int m_cond1Index;
   int m_cond2Index;
-  CorrelationThreeBodyParameter m_correlationParameter;
+  CorrelationThreeBodyParameter m_correlationThreeBodyParameter;
 };
 
 #endif

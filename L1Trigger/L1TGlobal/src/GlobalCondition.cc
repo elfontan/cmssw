@@ -152,6 +152,15 @@ const bool GlobalCondition::corr() const {
   return false;
 }
 
+// get logic flag for conditions, trigger objects are muons
+const bool GlobalCondition::corrThree() const {
+  if (m_condType == l1t::Type3s) {
+    return true;
+  }
+
+  return false;
+}
+
 // print condition
 void GlobalCondition::print(std::ostream& myCout) const {
   myCout << "\n  Condition name:     " << m_condName << std::endl;
