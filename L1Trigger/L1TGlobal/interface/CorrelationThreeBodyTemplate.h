@@ -6,12 +6,13 @@
  *
  *
  * Description: L1 Global Trigger correlation template.
- * Includes spatial correlation for two objects of different type.
+ * Include invariant mass calculation for three muon events.
  *
  * Implementation:
  *    <TODO: enter implementation details>
  *
- * \author: Vasile Mihai Ghete - HEPHY Vienna
+ * \author: Elisa Fontanesi - Boston University 
+ * Starting from CorrelationTemplate.h written by Vasile Mihai Ghete - HEPHY Vienna
  *
  * $Date$
  * $Revision$
@@ -102,8 +103,8 @@ public:
 
   /// get / set correlation parameters
   inline const CorrelationThreeBodyParameter* correlationThreeBodyParameter() const { return &m_correlationThreeBodyParameter; }
-  void setCorrelationThreeBodyParameter(const CorrelationThreeBodyParameter& corrParameter);
-  //void setCorrelationThreeBodyParameter(const CorrelationThreeBodyParameter& corrThreeBodyParameter);
+  //void setCorrelationThreeBodyParameter(const CorrelationThreeBodyParameter& corrParameter);
+  void setCorrelationThreeBodyParameter(const CorrelationThreeBodyParameter& corrThreeBodyParameter);
 
   /// print the condition
   void print(std::ostream& myCout) const override;

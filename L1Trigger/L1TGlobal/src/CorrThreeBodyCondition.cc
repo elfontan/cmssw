@@ -2,6 +2,12 @@
  * \class CorrThreeBodyCondition
  *
  * Description: evaluation of a three-body correlation condition (= three-muon invariant mass). 
+ *                                                                                                                                                                 
+ * Implementation:                                                                                                                                                           
+ *    <TODO: enter implementation details>                                                                                                                 
+ *                                                                                                                                     
+ * \author: Elisa Fontanesi - Boston University                                                                                                                                                            
+ * Starting from CorrelationTemplate.h written by Vasile Mihai Ghete - HEPHY Vienna      
  *
  */
 
@@ -37,13 +43,13 @@
 l1t::CorrThreeBodyCondition::CorrThreeBodyCondition() : ConditionEvaluation() {}
 
 //     from base template condition (from event setup usually)
-l1t::CorrThreeBodyCondition::CorrThreeBodyCondition(const GlobalCondition* corrTemplate,
+l1t::CorrThreeBodyCondition::CorrThreeBodyCondition(const GlobalCondition* corrThreeBodyTemplate,
                                   const GlobalCondition* cond0Condition,
                                   const GlobalCondition* cond1Condition,
                                   const GlobalCondition* cond2Condition,
                                   const GlobalBoard* ptrGTB)
     : ConditionEvaluation(),
-      m_gtCorrelationThreeBodyTemplate(static_cast<const CorrelationThreeBodyTemplate*>(corrTemplate)),
+      m_gtCorrelationThreeBodyTemplate(static_cast<const CorrelationThreeBodyTemplate*>(corrThreeBodyTemplate)),
       m_gtCond0(cond0Condition),
       m_gtCond1(cond1Condition),
       m_gtCond2(cond2Condition),
@@ -110,7 +116,7 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
 
   // FIRST OBJECT
   if (cond0Categ == CondMuon) {
-    std::cout << "--------------------- First muon checks ---------------------" << std::endl; 
+    std::cout << "\n --------------------- First muon checks ---------------------" << std::endl; 
     corrMuon = static_cast<const MuonTemplate*>(m_gtCond0);
     MuCondition muCondition(
 			    corrMuon, m_uGtB, 0, 0);
@@ -148,7 +154,7 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
 
   //switch (cond1Categ) {
   if (cond1Categ == CondMuon) {
-    std::cout << "--------------------- Second muon checks ---------------------" << std::endl; 
+    std::cout << "\n --------------------- Second muon checks ---------------------" << std::endl; 
     corrMuon = static_cast<const MuonTemplate*>(m_gtCond1);
     MuCondition muCondition(
 			    corrMuon, m_uGtB, 0, 0);
@@ -185,24 +191,25 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
   reqObjResult = false;
 
   if (cond2Categ == CondMuon) {
-    std::cout << "--------------------- Third muon checks ---------------------" << std::endl; 
+    std::cout << "\n --------------------- Third muon checks ---------------------" << std::endl; 
     corrMuon = static_cast<const MuonTemplate*>(m_gtCond2);
     MuCondition muCondition(
 			    corrMuon, m_uGtB, 0, 0);
  
     muCondition.evaluateConditionStoreResult(bxEval);
     reqObjResult = muCondition.condLastResult();
-    
+
     cond2Comb = (muCondition.getCombinationsInCond());
     cond2bx = bxEval + (corrMuon->condRelativeBx()); 
-    cndObjTypeVec[2] = (corrMuon->objectType())[0];
-    
+    cndObjTypeVec[2] = (corrMuon->objectType())[0];    
+
     //EF if (m_verbosity) {
     std::ostringstream myCout;
     muCondition.print(myCout);
-    //std::cout << myCout.str() << std::endl;
-    LogDebug("L1TGlobal") << myCout.str() << std::endl;
+    std::cout << myCout.str() << std::endl;
+    //LogDebug("L1TGlobal") << myCout.str() << std::endl;
     //EF }
+    
   }
   
   else {
@@ -217,7 +224,7 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
   } else {
     std::cout << "\n"
       //LogDebug("L1TGlobal") << "\n"
-                          << "    All subconditions true for object requirements: evaluate three-body correlation requirements.\n"
+                          << "Found three objects satisfying subconditions: evaluate three-body correlation requirements.\n"
                           << std::endl;
   }
 
@@ -232,18 +239,12 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
   vector<long long> dimuInvMass_01;                                                                                                         
   vector<long long> dimuInvMass_02;                                                                                                         
   vector<long long> dimuInvMass_12;                                                                                                         
-  vector<long long> dimuInvMass_01_GeV;                                                                                                         
-  vector<long long> dimuInvMass_02_GeV;                                                                                                         
-  vector<long long> dimuInvMass_12_GeV;                                                                                                         
   muIndexes_01.clear();                                                                                                      
   muIndexes_02.clear();                                                                                                      
   muIndexes_12.clear();                                          
   dimuInvMass_01.clear();                                                                                                                
   dimuInvMass_02.clear();                                                                                                                
   dimuInvMass_12.clear();                                                                                                                
-  dimuInvMass_01_GeV.clear();                                                                                                                
-  dimuInvMass_02_GeV.clear();                                                                                                                
-  dimuInvMass_12_GeV.clear();                                                                                                                
  
   // vector to store the indices of the objects from the combination evaluated in the condition
   SingleCombInCond objectsInComb;
@@ -416,7 +417,7 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
       
       //if (m_verbosity) {
       //  LogDebug("L1TGlobal") << "    First correlation pair [" << l1TGtObjectEnumToString(cndObjTypeVec[0]) << ", "
-      std::cout << "    EF First correlation pair [" << l1TGtObjectEnumToString(cndObjTypeVec[0]) << ", "
+      std::cout << "\n ### EF First correlation pair [" << l1TGtObjectEnumToString(cndObjTypeVec[0]) << ", "
 		<< l1TGtObjectEnumToString(cndObjTypeVec[1]) << "] with collection indices [" << obj0Index
 		<< ", " << obj1Index << "] "
 		<< " has: \n"
@@ -507,7 +508,8 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
 	//Note: There is an assumption here that Cos and Cosh have the same precision                                                                         
 	preShift = precPtLUTObj0 + precPtLUTObj1 + precCosLUT - corrPar.precMassCut;
 	
-	LogDebug("L1TGlobal") << "    Testing Invariant Mass for the first pair 0-1 (" << lutObj0 << "," << lutObj1 << ") ["
+	std::cout << "    Testing Invariant Mass for the first pair 0-1 (" << lutObj0 << "," << lutObj1 << ") ["
+	  //LogDebug("L1TGlobal") << "    Testing Invariant Mass for the first pair 0-1 (" << lutObj0 << "," << lutObj1 << ") ["
 			      << (long long)(corrPar.minMassCutValue * pow(10, preShift)) << ","
 			      << (long long)(corrPar.maxMassCutValue * pow(10, preShift))
 			      << "] with precision = " << corrPar.precMassCut << "\n"
@@ -530,7 +532,6 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
 	muIndexes_01.push_back(etIndex0);                                                                                                    
 	muIndexes_01.push_back(etIndex1);                                                                                                                                   
 	dimuInvMass_01.push_back(massSq);                     
-	dimuInvMass_01_GeV.push_back(sqrt(fabs(2. * massSqPhy)));                     
       }
       
       //EF
@@ -653,7 +654,7 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
       
       //if (m_verbosity) {
       //  LogDebug("L1TGlobal") << "    Correlation pair [" << l1TGtObjectEnumToString(cndObjTypeVec[0]) << ", "
-      std::cout << "    EF Second correlation pair [" << l1TGtObjectEnumToString(cndObjTypeVec[0]) << ", "
+      std::cout << "\n ### EF Second correlation pair [" << l1TGtObjectEnumToString(cndObjTypeVec[0]) << ", "
 		<< l1TGtObjectEnumToString(cndObjTypeVec[2]) << "] with collection indices [" << obj0Index
 		<< ", " << obj2Index << "] "
 		<< " has: \n"
@@ -696,14 +697,18 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
       precDeltaEtaLUT = m_gtScales->getPrec_DeltaEta(lutName);
       
       //LogDebug("L1TGlobal") << "Obj0 phiFW = " << phiIndex0 << " Obj2 phiFW = " << phiIndex2 << "\n"
-      std::cout << "Obj0 phiFW = " << phiIndex0 << " Obj2 phiFW = " << phiIndex2 << "\n"
+      std::cout << "-----------------------------------" 
+		<< "Obj0 phiFW = " << phiIndex0 << " Obj2 phiFW = " << phiIndex2 << "\n"
 		<< "    DeltaPhiFW = " << deltaPhiFW << "\n"
 		<< "    LUT Name = " << lutName << " Prec = " << precDeltaPhiLUT
 		<< "    DeltaPhiLUT = " << deltaPhiLUT << "\n"
+		<< "-----------------------------------" 
 		<< "Obj0 etaFW = " << etaIndex0 << " Obj2 etaFW = " << etaIndex2 << "\n"
 		<< "    DeltaEtaFW = " << deltaEtaFW << "\n"
 		<< "    LUT Name = " << lutName << " Prec = " << precDeltaEtaLUT
-		<< "    DeltaEtaLUT = " << deltaEtaLUT << std::endl;
+		<< "    DeltaEtaLUT = " << deltaEtaLUT 
+		<< "-----------------------------------" 
+		<< std::endl;
       
       if (corrPar.corrCutType & 0x8 || corrPar.corrCutType & 0x10) {
 	//invariant mass calculation based on                                                                                                         
@@ -746,7 +751,8 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
 	//Note: There is an assumption here that Cos and Cosh have the same precision                                                                         
 	preShift = precPtLUTObj0 + precPtLUTObj2 + precCosLUT - corrPar.precMassCut;
 	
-	LogDebug("L1TGlobal") << "    Testing Invariant Mass for the second pair 0-2 (" << lutObj0 << "," << lutObj2 << ") ["
+	std::cout << "    Testing Invariant Mass for the second pair 0-2 (" << lutObj0 << "," << lutObj2 << ") ["
+	  //LogDebug("L1TGlobal") << "    Testing Invariant Mass for the second pair 0-2 (" << lutObj0 << "," << lutObj2 << ") ["
 			      << (long long)(corrPar.minMassCutValue * pow(10, preShift)) << ","
 			      << (long long)(corrPar.maxMassCutValue * pow(10, preShift))
 			      << "] with precision = " << corrPar.precMassCut << "\n"
@@ -769,7 +775,6 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
 	muIndexes_02.push_back(etIndex0);                                                                                                    
 	muIndexes_02.push_back(etIndex2);                                                                                                                                   
 	dimuInvMass_02.push_back(massSq);                                                                                                       
-	dimuInvMass_02_GeV.push_back(sqrt(fabs(2. * massSqPhy)));                                                                                                       
       }
       //EF                                                                                                                                       
       /*std::cout << muIndexes_02.size() << std::endl;                                                                                                           
@@ -892,7 +897,7 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
       
       //if (m_verbosity) {
       //  LogDebug("L1TGlobal") << "    Correlation pair [" << l1TGtObjectEnumToString(cndObjTypeVec[1]) << ", "
-      std::cout << "    EF Second correlation pair [" << l1TGtObjectEnumToString(cndObjTypeVec[1]) << ", "
+      std::cout << "\n ### EF Third correlation pair [" << l1TGtObjectEnumToString(cndObjTypeVec[1]) << ", "
 		<< l1TGtObjectEnumToString(cndObjTypeVec[2]) << "] with collection indices [" << obj1Index
 		<< ", " << obj2Index << "] "
 		<< " has: \n"
@@ -984,7 +989,8 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
 	//Note: There is an assumption here that Cos and Cosh have the same precision                                                                         
 	preShift = precPtLUTObj1 + precPtLUTObj2 + precCosLUT - corrPar.precMassCut;
 	
-	LogDebug("L1TGlobal") << "    Testing Invariant Mass for the third pair 1-2 (" << lutObj1 << "," << lutObj2 << ") ["
+	std::cout << "    Testing Invariant Mass for the third pair 1-2 (" << lutObj1 << "," << lutObj2 << ") ["
+	  //LogDebug("L1TGlobal") << "    Testing Invariant Mass for the third pair 1-2 (" << lutObj1 << "," << lutObj2 << ") ["
 			      << (long long)(corrPar.minMassCutValue * pow(10, preShift)) << ","
 			      << (long long)(corrPar.maxMassCutValue * pow(10, preShift))
 			      << "] with precision = " << corrPar.precMassCut << "\n"
@@ -1003,14 +1009,13 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
 			      << "  sqrt(|massSq|) = " << sqrt(fabs(2. * massSqPhy)) << std::endl;
 
 	//EF                                                                                        
-	//std::cout << "Object pair has a pT of " << ptObj1 << " and " << ptObj2 << std::endl;                                                                                         
+	std::cout << "Object pair has a pT of " << ptObj1 << " and " << ptObj2 << std::endl;                                                                                         
 	muIndexes_12.push_back(etIndex1);                                                                                                    
 	muIndexes_12.push_back(etIndex2);                                                                                                                                   
 	dimuInvMass_12.push_back(massSq);                                                                                                                     
-	dimuInvMass_12_GeV.push_back(sqrt(fabs(2. * massSqPhy)));                                                                                                                     
       }
       //EF                                                                                                                                       
-      /*std::cout << muIndexes_12.size() << std::endl;                                                                                                           
+      std::cout << muIndexes_12.size() << std::endl;                                                                                                           
       std::cout << dimuInvMass_12.size() << std::endl;
       if (muIndexes_12.size() != 0)                                                                                                                                    
 	{                                                                                                                                                                  
@@ -1019,41 +1024,40 @@ const bool l1t::CorrThreeBodyCondition::evaluateCondition(const int bxEval) cons
 	  for (long unsigned int m=0; m < dimuInvMass_12.size(); m++)                             
 	    { std::cout << "Position " << m << ": Inv mass calculated to be " << dimuInvMass_12.at(m) <<  " = " << dimuInvMass_12_GeV.at(m) << " GeV" << std::endl; }                   
 	}
-      */                                                                                             
+                                                                                                   
     }  //end loop over second leg                                                                                                                                    
   }  //end loop over first leg                                                                                                                    
   
   // EF 
   long long massSq_3body = 0;
-  bool reqResult = true;
+  bool reqResult = false;
   vector<long long> trimuInvMass;
   for (auto it_01 = dimuInvMass_01.cbegin(); it_01 != dimuInvMass_01.cend(); it_01++){
     for (auto it_02 = dimuInvMass_02.cbegin(); it_02 != dimuInvMass_02.cend(); it_02++){
       for (auto it_12 = dimuInvMass_12.cbegin(); it_12 != dimuInvMass_12.cend(); it_12++){
-	//std::cout << "Iterators are: " << *it_01 << ", " << *it_02 << ", " << *it_12 << std::endl;
 	if((*it_01 != *it_02) && (*it_01 != *it_12) && (*it_02 != *it_12))
 	  { 
+	    LogDebug("L1TGlobal") << "Iterators are: " << *it_01 << ", " << *it_02 << ", " << *it_12 << std::endl;
+	    //std::cout << "Iterators are: " << *it_01 << ", " << *it_02 << ", " << *it_12 << std::endl;
 	    massSq_3body = *it_01 + *it_02 + *it_12;
-	    // std::cout << "EF TEST: \n massSq_3body = " << massSq_3body << "\n"
-	    //			     << "    massSq_3body (shift)= " << (massSq_3body / pow(10, preShift + corrPar.precMassCut)) << "\n"
-	    //                       << "    massSqPhy/2  = " << massSqPhy
-	    //                       << "   sqrt(|massSq|) = " << sqrt(fabs(2. * massSqPhy)) 
-	    //	                     << std::endl;
-
-	      if (massSq_3body >= 0 && massSq_3body >= (long long)(corrPar.minMassCutValue * pow(10, preShift)) &&
-		  massSq_3body <= (long long)(corrPar.maxMassCutValue * pow(10, preShift))) {
-		LogDebug("L1TGlobal") << "    Passed Invariant Mass Cut ["
+	    reqResult = true;
+	    LogDebug("L1TGlobal") << "\n -----> EF: massSq_3body = " << massSq_3body << std::endl;
+	    //std::cout << "\n -----> EF: massSq_3body = " << massSq_3body << std::endl;
+	    
+	    if (massSq_3body >= 0 && massSq_3body >= (long long)(corrPar.minMassCutValue * pow(10, preShift)) &&
+		massSq_3body <= (long long)(corrPar.maxMassCutValue * pow(10, preShift))) {
+	      LogDebug("L1TGlobal") << "    Passed Invariant Mass Cut ["
 				    << (long long)(corrPar.minMassCutValue * pow(10, preShift)) << ","
 				    << (long long)(corrPar.maxMassCutValue * pow(10, preShift)) << "]" << std::endl;
-		trimuInvMass.push_back(massSq_3body);
-	      } 
-	      else {
-		LogDebug("L1TGlobal") << "    Failed Invariant Mass Cut ["
-				      << (long long)(corrPar.minMassCutValue * pow(10, preShift)) << ","
-				      << (long long)(corrPar.maxMassCutValue * pow(10, preShift)) << "]" << std::endl;
-		reqResult = false;
-	      }
-	      
+	      trimuInvMass.push_back(massSq_3body);
+	    } 
+	    else {
+	      LogDebug("L1TGlobal") << "    Failed Invariant Mass Cut ["
+				    << (long long)(corrPar.minMassCutValue * pow(10, preShift)) << ","
+				    << (long long)(corrPar.maxMassCutValue * pow(10, preShift)) << "]" << std::endl;
+	      reqResult = false;
+	    }
+	    
 	  }
 	else
 	  {

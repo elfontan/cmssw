@@ -8,7 +8,8 @@
  * Implementation:
  *    <TODO: enter implementation details>
  *
- * \author: Vasile Mihai Ghete - HEPHY Vienna
+ * \author: Elisa Fontanesi - Boston University                                                                                                                                                            
+ * Starting from CorrelationTemplate.h written by Vasile Mihai Ghete - HEPHY Vienna   
  *
  * $Date$
  * $Revision$
@@ -128,8 +129,8 @@ void CorrelationThreeBodyTemplate::setCond1Index(const int& condIndex) { m_cond1
 void CorrelationThreeBodyTemplate::setCond2Index(const int& condIndex) { m_cond2Index = condIndex; }
 
 // set the correlation parameters of the condition
-void CorrelationThreeBodyTemplate::setCorrelationThreeBodyParameter(const CorrelationThreeBodyParameter& corrThreeParameter) {
-  m_correlationThreeBodyParameter = corrThreeParameter;
+void CorrelationThreeBodyTemplate::setCorrelationThreeBodyParameter(const CorrelationThreeBodyParameter& corrThreeBodyParameter) {
+  m_correlationThreeBodyParameter = corrThreeBodyParameter;
 }
 
 void CorrelationThreeBodyTemplate::print(std::ostream& myCout) const {
