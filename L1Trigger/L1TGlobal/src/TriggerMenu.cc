@@ -9,6 +9,7 @@
  *
  * \author: Vasile Mihai Ghete - HEPHY Vienna
  *          Vladimir Rekovic - extend for overlap removal
+ *          Elisa Fontanesi - extended for three-body correlation conditions
  *
  * $Date$
  * $Revision$
@@ -276,7 +277,6 @@ void TriggerMenu::buildGtConditionMap() {
   for (std::vector<std::vector<CorrelationThreeBodyTemplate> >::iterator itCondOnChip = m_vecCorrelationThreeBodyTemplate.begin();
        itCondOnChip != m_vecCorrelationThreeBodyTemplate.end();
        itCondOnChip++) {
-    std::cout << "EF vecCorrelationThreeBodySize is " << vecCorrelationThreeBodySize << std::endl;
     chipNr++;
 
     for (std::vector<CorrelationThreeBodyTemplate>::iterator itCond = itCondOnChip->begin(); itCond != itCondOnChip->end();

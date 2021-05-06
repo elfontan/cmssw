@@ -13,8 +13,8 @@
  *                - indexing
  *                - correlations with overlap object removal]
  *
- * \new features: Elisa Fontanesi
- *                - three-body correlations
+ * \new features: Elisa Fontanesi 
+ *                - extended for three-body correlation conditions
  *
  * $Date$
  * $Revision$
@@ -129,11 +129,6 @@ void l1t::TriggerMenuParser::setVecCorrelationTemplate(
   m_vecCorrelationTemplate = vecCorrelationTempl;
 }
 
-/*void l1t::TriggerMenuParser::setVecCorrelationThreeBodyTemplate(
-    const std::vector<std::vector<CorrelationThreeBodyTemplate> >& vecCorrelationThreeBodyTempl) {
-  m_vecCorrelationThreeBodyTemplate = vecCorrelationThreeBodyTempl;
-}
-*/
 void l1t::TriggerMenuParser::setVecCorrelationWithOverlapRemovalTemplate(
     const std::vector<std::vector<CorrelationWithOverlapRemovalTemplate> >& vecCorrelationWithOverlapRemovalTempl) {
   m_vecCorrelationWithOverlapRemovalTemplate = vecCorrelationWithOverlapRemovalTempl;
@@ -144,10 +139,6 @@ void l1t::TriggerMenuParser::setVecCorrelationWithOverlapRemovalTemplate(
 void l1t::TriggerMenuParser::setCorMuonTemplate(const std::vector<std::vector<MuonTemplate> >& corMuonTempl) {
   m_corMuonTemplate = corMuonTempl;
 }
-/*void l1t::TriggerMenuParser::setCorMuonThreeBodyTemplate(const std::vector<std::vector<MuonTemplate> >& corMuonTempl) {
-  m_corMuonThreeBodyTemplate = corMuonTempl;
-}
-*/
 
 void l1t::TriggerMenuParser::setCorCaloTemplate(const std::vector<std::vector<CaloTemplate> >& corCaloTempl) {
   m_corCaloTemplate = corCaloTempl;
@@ -313,7 +304,7 @@ void l1t::TriggerMenuParser::parseCondFormats(const L1TUtmTriggerMenu* utmMenu) 
                    condition.getType() == esConditionType::TransverseMass) {
           parseCorrelation(condition, chipNr);
 
-          //parse three-body Correlation Condition
+          //parse three-body Correlation Conditions
         } else if (condition.getType() == esConditionType::InvariantMass3) {
           parseCorrelationThreeBody(condition, chipNr); 
 
@@ -2784,7 +2775,6 @@ bool l1t::TriggerMenuParser::parseCorrelationThreeBody(tmeventsetup::esCondition
   const int nrObj = 3;
 
   // object types and greater equal flag - filled in the loop
-  //int intGEq[nrObj] = {-1, -1, -1};
   std::vector<GlobalObject> objType(nrObj);          
   std::vector<GtConditionCategory> condCateg(nrObj); 
 
@@ -2811,8 +2801,7 @@ bool l1t::TriggerMenuParser::parseCorrelationThreeBody(tmeventsetup::esCondition
     if (maxV > 1.0e8) maxV = 1.0e8;
     
     if (cut.getCutType() == esCutType::Mass) {
-      //LogDebug("TriggerMenuParser") << "CutType: " << cut.getCutType() << "\tMass Cut minV = " << minV
-      std::cout << "CutType: " << cut.getCutType() 
+      LogDebug("TriggerMenuParser") << "CutType: " << cut.getCutType() 
 		<< "\tMass Cut minV = " << minV
 		<< "\tMass Cut maxV = " << maxV 
 		<< " precMin = " << cut.getMinimum().index		    
@@ -2845,8 +2834,6 @@ bool l1t::TriggerMenuParser::parseCorrelationThreeBody(tmeventsetup::esCondition
       // we have a muon
       parseMuonCorr(&object, chipNr); 
       corrIndexVal[lll] = (m_corMuonTemplate[chipNr]).size() - 1;
-      //parseMuonThreeBodyCorr(&object, chipNr);  //EF
-      //corrIndexVal[lll] = (m_corMuonThreeBodyTemplate[chipNr]).size() - 1;
 
       //Now set some flags for this subCondition
       objType[lll] = gtMu;
@@ -2859,7 +2846,7 @@ bool l1t::TriggerMenuParser::parseCorrelationThreeBody(tmeventsetup::esCondition
     }  
   }  // End loop over legs
 
-  // fill the correlation condition
+  // fill the three-body correlation condition
   correlationThreeBodyCond.setCondType(cType);
   correlationThreeBodyCond.setObjectType(objType);
   correlationThreeBodyCond.setCondChipNr(chipNr);

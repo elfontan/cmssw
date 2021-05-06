@@ -8,6 +8,7 @@
  *    <TODO: enter implementation details>
  *
  * \author: Vladimir Rekovic,   Brian Winer, OSU   Vasile Mihai Ghete - HEPHY Vienna
+ *          Elisa Fontanesi - extended for three-body correlation conditions
  *
  * $Date$
  * $Revision$

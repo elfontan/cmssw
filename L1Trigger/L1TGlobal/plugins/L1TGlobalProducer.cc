@@ -1,6 +1,7 @@
 // L1TGlobalProducer.cc
 //author:   Brian Winer - Ohio State
 //          Vladimir Rekovic - extend for overlap removal
+//          Elisa Fontanesi - extended for three-body correlation conditions
 
 #include "L1Trigger/L1TGlobal/plugins/L1TGlobalProducer.h"
 

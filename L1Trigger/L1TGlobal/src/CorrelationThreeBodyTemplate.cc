@@ -1,15 +1,14 @@
 /**
  * \class CorrelationThreeBodyTemplate
  *
- *
- * Description: L1 Global Trigger correlation template.
- * Include invariant mass calculation for three muon events.
+ * Description: L1 Global Trigger three-body correlation template:                                                                                                               
+ *              include invariant mass calculation for three-muon events                                                                                                                                   
  *
  * Implementation:
  *    <TODO: enter implementation details>
  *
  * \author: Elisa Fontanesi - Boston University                                                                                                                                                            
- * Starting from CorrelationTemplate.h written by Vasile Mihai Ghete - HEPHY Vienna   
+ *          CorrelationTemplate and CorrelationWithOverlapRemovalTemplate classes used as a starting point                                                                           
  *
  * $Date$
  * $Revision$

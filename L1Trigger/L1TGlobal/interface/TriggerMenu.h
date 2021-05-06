@@ -12,6 +12,7 @@
  *
  * \author: Vasile Mihai Ghete - HEPHY Vienna
  *          Vladimir Rekovic - extend for overlap removal
+ *          Elisa Fontanesi - extended for three-body correlation conditions
  *
  * $Date$
  * $Revision$

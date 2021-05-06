@@ -3,14 +3,15 @@
 
 /**
  * \class CorrThreeBodyCondition
- * 
- * Description: evaluation of a three-body correlation condition (= three-muon invariant mass).                                                     
+ *
+ * Description: L1 Global Trigger three-body correlation conditions:                                                                      
+ *              evaluation of a three-body correlation condition (= three-muon invariant mass)    
  *                                                                                                                                               
  * Implementation:                                                                                                                                             
  *    <TODO: enter implementation details>                                                                                                 
  *                                                                                                                                                                         
  * \author: Elisa Fontanesi - Boston University                                                                                                                                                            
- * Starting from CorrelationTemplate.h written by Vasile Mihai Ghete - HEPHY Vienna                                                                                   
+ *          CorrCondition and CorrWithOverlapRemovalCondition classes used as a starting point
  *                                                                                                                                                       
  */ 
 

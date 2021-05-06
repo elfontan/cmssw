@@ -16,6 +16,9 @@
  *                - indexing
  *                - correlations with overlap object removal
  *
+ * \new features: Elisa Fontanesi                                                                               
+ *                - extended for three-body correlation conditions 
+ *
  * $Date$
  * $Revision$
  *
