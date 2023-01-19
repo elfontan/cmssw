@@ -381,6 +381,9 @@ void l1t::GlobalBoard::receiveMuonShowerObjectData(const edm::Event& iEvent,
   if (receiveMuShower) {
     edm::Handle<BXVector<l1t::MuonShower>> muonData;
     iEvent.getByToken(muShowerInputToken, muonData);
+    std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
+    std::cout << "@@@ ELISA GlobalBoard: Muon Shower received @@@" << std::endl;
+    std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
 
     if (!muonData.isValid()) {
       if (m_verbosity) {
@@ -391,6 +394,9 @@ void l1t::GlobalBoard::receiveMuonShowerObjectData(const edm::Event& iEvent,
       //Loop over Muon Showers in this bx
       int nObj = 0;
       for (auto mu = muonData->begin(0); mu != muonData->end(0); ++mu) {
+	//std::cout << "@@@ ELISA GlobalBoard: For loop on muonData, BX vector containing the info about the muon showers from GMT, cycle " << mu << std::endl;
+	
+	std::cout << "@@@ ELISA GlobalBoard: nrL1MuShower" << nrL1MuShower << std::endl;
         if (nObj < nrL1MuShower) {
           /* Important here to split up the single object into 4 separate MuonShower
              bits for the global board. This is because the UTM library considers those bits separate as well
@@ -400,8 +406,12 @@ void l1t::GlobalBoard::receiveMuonShowerObjectData(const edm::Event& iEvent,
           l1t::MuonShower musOutOfTime0;
           l1t::MuonShower musOutOfTime1;
 
-          mus0.setMus0(mu->mus0());
-          mus1.setMus1(mu->mus1());
+	  std::cout << "@@@ ELISA GlobalBoard: setMus0 = " << mu->isOneNominalInTime() << std::endl;
+	  std::cout << "@@@ ELISA GlobalBoard: setMus1 = " << mu->isOneTightInTime() << std::endl;
+          //mus0.setMus0(mu->mus0());
+          //mus1.setMus1(mu->mus1());
+          mus0.setMus0(mu->isOneNominalInTime());
+          mus1.setMus1(mu->isOneTightInTime());
           musOutOfTime0.setMusOutOfTime0(mu->musOutOfTime0());
           musOutOfTime1.setMusOutOfTime1(mu->musOutOfTime1());
 
@@ -413,10 +423,15 @@ void l1t::GlobalBoard::receiveMuonShowerObjectData(const edm::Event& iEvent,
           edm::LogWarning("L1TGlobal") << " Too many Muon Showers (" << nObj
                                        << ") for uGT Configuration maxMuShower =" << nrL1MuShower;
         }
+	std::cout << "@@@ ELISA Global Board: *m_candL1MuShower size = " << (*m_candL1MuShower).size() << std::endl;
+	//EF
+	//for (auto i = m_candL1MuShower->begin(0); i != m_candL1MuShower->end(0); ++i) {
+	//  std::cout << "@@@ ELISA GlobalBoard: m_candL1MuShower = " << i << std::endl;}
+
         nObj++;
       }  //end loop over muon showers in bx
     }    //end if over valid muon shower data
-  }      //end if ReveiveMuonShower data
+  }      //end if ReceiveMuonShower data
 }
 
 // receive data from Global External Conditions
@@ -549,12 +564,12 @@ void l1t::GlobalBoard::runGTL(const edm::Event&,
 
           cMapResults[itCond->first] = muShowerCondition;
 
-          if (m_verbosity && m_isDebugEnabled) {
-            std::ostringstream myCout;
-            muShowerCondition->print(myCout);
-
-            edm::LogWarning("L1TGlobal") << "MuonShowerCondition " << myCout.str();
-          }
+          //EFif (m_verbosity && m_isDebugEnabled) {
+	  std::ostringstream myCout;
+	  muShowerCondition->print(myCout);
+	  
+	  edm::LogWarning("L1TGlobal") << "MuonShowerCondition " << myCout.str();
+          //EF}
           //delete muShowerCondition;
 
         } break;

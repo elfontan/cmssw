@@ -111,16 +111,25 @@ const bool l1t::MuonShowerCondition::evaluateCondition(const int bxEval) const {
 
   bool condResult = false;
 
+  //EF
+  if (checkObjectParameter(0, *(candVec->at(useBx, 0)), 0)) {condResult = true;}
+  if (condResult)
+    {
+      int indexObj = 0;
+      objectsInComb.push_back(indexObj);
+      (combinationsInCond()).push_back(objectsInComb);
+    }
+  
+  /* Removed by EF
   // index is always zero, as they are global quantities (there is only one object)
   int indexObj = 0;
-
   objectsInComb.push_back(indexObj);
   (combinationsInCond()).push_back(objectsInComb);
 
   // if we get here all checks were successfull for this combination
   // set the general result for evaluateCondition to "true"
-
   condResult = true;
+  */
   return condResult;
 }
 
@@ -141,6 +150,7 @@ const l1t::MuonShower* l1t::MuonShowerCondition::getCandidate(const int bx, cons
 const bool l1t::MuonShowerCondition::checkObjectParameter(const int iCondition,
                                                           const l1t::MuonShower& cand,
                                                           const unsigned int index) const {
+  bool checkObj = false;
   // number of objects in condition
   int nObjInCond = m_gtMuonShowerTemplate->nrObjects();
 
@@ -150,22 +160,66 @@ const bool l1t::MuonShowerCondition::checkObjectParameter(const int iCondition,
 
   const MuonShowerTemplate::ObjectParameter objPar = (*(m_gtMuonShowerTemplate->objectParameter()))[iCondition];
 
-  LogDebug("L1TGlobal") << "\n MuonShowerTemplate::ObjectParameter : " << std::hex << "\n\t MuonShower0 = 0x "
-                        << objPar.MuonShower0 << "\n\t MuonShower1 = 0x " << objPar.MuonShower1
+  LogDebug("L1TGlobal") << "\n MuonShowerTemplate::ObjectParameter : " << std::hex 
+			<< "\n\t MuonShower0 = 0x " << objPar.MuonShower0 
+			<< "\n\t MuonShower1 = 0x " << objPar.MuonShower1
                         << "\n\t MuonShowerOutOfTime0 = 0x " << objPar.MuonShowerOutOfTime0
                         << "\n\t MuonShowerOutOfTime1 = 0x " << objPar.MuonShowerOutOfTime1 << std::endl;
 
   LogDebug("L1TGlobal") << "\n l1t::MuonShower : "
-                        << "\n\t MuonShower0 = 0x " << cand.mus0() << "\n\t MuonShower1 = 0x " << cand.mus1()
+                        << "\n\t MuonShower0 = 0x " << cand.mus0() 
+			<< "\n\t MuonShower1 = 0x " << cand.mus1()
                         << "\n\t MuonShowerOutOfTime0 = 0x " << cand.musOutOfTime0()
                         << "\n\t MuonShowerOutOfTime1 = 0x " << cand.musOutOfTime1() << std::dec << std::endl;
 
+  /*
+  // check oneNominalInTime                                                                                                                                           
+  if (objPar.MuonShower0)
+    {
+      std::cout << "Checking condition for MuonShower0!" << std::endl;
+      if (cand.isValid() && cand.mus0()) {
+        checkObj = true;
+	std::cout << "Now checkObj is true for OneNominalInTime = " << checkObj << std::endl;
+      }
+      else{
+        LogDebug("L1TGlobal") << "\t\t MuonShower failed MuonShower0 requirement" << std::endl;
+	std::cout << "oneNominalInTime discarded =>>>>>> return FALSE" << std::endl;
+        return false;
+      }
+    }
+  // check oneTightInTime                                                                                                                                             
+  else if (objPar.MuonShower1)
+    {
+      std::cout << "Checking condition for MuonShower1!" << std::endl;
+      //if (cand.isOneTightInTime() == objPar.MuonShower1) {                                                                                                          
+      if (cand.isValid() && cand.mus1()) {
+        checkObj = true;
+	std::cout << "Now checkObj is true for OneTightInTime = " << checkObj << std::endl;
+      }
+      else{
+        LogDebug("L1TGlobal") << "\t\t MuonShower failed MuonShower1 requirement" << std::endl;
+	std::cout << "oneTightInTime discarded =>>>>>> return FALSE" << std::endl;
+        return false;
+      }
+    }
+  // check oneNominalOutOfTime                                                                                                                                        
+  else if (cand.musOutOfTime0() != objPar.MuonShowerOutOfTime0) {
+    LogDebug("L1TGlobal") << "\t\t MuonShower failed MuonShowerOutOfTime0 requirement" << std::endl;
+    return false;
+  }
+  // check oneTightOutOfTime                                                                                                                                          
+  else if (cand.musOutOfTime1() != objPar.MuonShowerOutOfTime1) {
+    LogDebug("L1TGlobal") << "\t\t MuonShower failed MuonShowerOutOfTime1 requirement" << std::endl;
+    return false;
+  }
+  else {std::cout << "No muon shower candidates in the event!" << std::endl;}
+  */ 
   // check oneNominalInTime
-  if (cand.mus0() != objPar.MuonShower0) {
+  if (cand.mus0() && (cand.mus0() != objPar.MuonShower0)) {
     LogDebug("L1TGlobal") << "\t\t MuonShower failed MuonShower0 requirement" << std::endl;
     return false;
   }
-  if (cand.mus1() != objPar.MuonShower1) {
+  if (cand.mus1() && (cand.mus1() != objPar.MuonShower1)) {
     LogDebug("L1TGlobal") << "\t\t MuonShower failed MuonShower1 requirement" << std::endl;
     return false;
   }
