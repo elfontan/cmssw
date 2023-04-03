@@ -77,6 +77,13 @@ public:
     unsigned int etaWindow1Upper;
     unsigned int etaWindow2Lower;
     unsigned int etaWindow2Upper;
+    unsigned int etaWindow3Lower;
+    unsigned int etaWindow3Upper;
+
+    unsigned int indexWindow1Lower;
+    unsigned int indexWindow1Upper;
+    unsigned int indexWindow2Lower;
+    unsigned int indexWindow2Upper;
 
     unsigned int phiWindow1Lower;
     unsigned int phiWindow1Upper;

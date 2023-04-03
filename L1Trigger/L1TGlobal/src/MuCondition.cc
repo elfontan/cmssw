@@ -440,10 +440,23 @@ const bool l1t::MuCondition::checkObjectParameter(const int iCondition,
                      objPar.etaWindow1Upper,
                      objPar.etaWindow2Lower,
                      objPar.etaWindow2Upper,
+                     objPar.etaWindow3Lower,
+                     objPar.etaWindow3Upper,
                      8)) {
     LogDebug("L1TGlobal") << "\t\t l1t::Candidate failed checkRange(eta)" << std::endl;
     return false;
   }
+
+  // check tfMuonIndex
+  /*if (!checkRangeIndex(cand.tfMuonIndex(),
+                     objPar.indexWindow1Lower,
+                     objPar.indexWindow1Upper,
+                     objPar.indexWindow2Lower,
+                     objPar.indexWindow2Upper,
+                     8)) {
+    LogDebug("L1TGlobal") << "\t\t l1t::Candidate failed checkRange(index)" << std::endl;
+    return false;
+    }*/
 
   // check phi
   if (!checkRangePhi(cand.hwPhiAtVtx(),

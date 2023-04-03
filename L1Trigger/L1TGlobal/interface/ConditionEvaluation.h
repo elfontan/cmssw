@@ -117,7 +117,18 @@ namespace l1t {
                              const Type1& W1endR,
                              const Type1& W2beginR,
                              const Type1& W2endR,
+                             const Type1& W3beginR,
+                             const Type1& W3endR,
                              const unsigned int nEtaBits) const;
+
+    /// check if a value is in a given range and outside of a veto range
+    template <class Type1>
+    const bool checkRangeIndex(const unsigned int bitNumber,
+                             const Type1& W1beginR,
+                             const Type1& W1endR,
+                             const Type1& W2beginR,
+                             const Type1& W2endR,
+                             const unsigned int nIndexBits) const;
 
     /// check if a value is in a given range and outside of a veto range
     template <class Type1>
@@ -281,8 +292,10 @@ namespace l1t {
                                                 const Type1& W1endR,
                                                 const Type1& W2beginR,
                                                 const Type1& W2endR,
+                                                const Type1& W3beginR,
+                                                const Type1& W3endR,
                                                 const unsigned int nEtaBits) const {
-    // set condtion to true if beginR==endR = default -1
+    // set condition to true if beginR==endR = default -1
     if (W1beginR == W1endR && W1beginR == (Type1)-1) {
       return true;
     }
@@ -342,7 +355,35 @@ namespace l1t {
                            << "\n\t passWindow2 = " << passWindow2
                            << "\n\t pass W1 || W2 = " << (passWindow1 || passWindow2) << std::endl;
 
-    if (passWindow1 || passWindow2) {
+    if (W3beginR == W2endR && W3beginR == (Type1)-1) {
+      return passWindow2;
+    }
+
+    unsigned int W3diff1 = W3endR - W3beginR;
+    unsigned int W3diff2 = bitNumber - W3beginR;
+    unsigned int W3diff3 = W3endR - bitNumber;
+
+    bool W3cond1 = ((W3diff1 >> nEtaBits) & 1) ? false : true;
+    bool W3cond2 = ((W3diff2 >> nEtaBits) & 1) ? false : true;
+    bool W3cond3 = ((W3diff3 >> nEtaBits) & 1) ? false : true;
+
+    bool passWindow3 = false;
+    if (W3cond1 && (W3cond2 && W3cond3))
+      passWindow3 = true;
+    else if (!W3cond1 && (W3cond2 || W3cond3))
+      passWindow3 = true;
+    else {
+      passWindow3 = false;
+    }
+
+    LogDebug("l1t|Global") << "\n\t W3beginR = " << W3beginR << "\n\t W3endR   = " << W3endR
+                           << "\n\t W3diff1 = " << W3diff1 << "\n\t W3cond1 = " << W3cond1
+                           << "\n\t W3diff2 = " << W3diff2 << "\n\t W3cond2 = " << W3cond2
+                           << "\n\t W3diff3 = " << W3diff3 << "\n\t W3cond3 = " << W3cond3
+                           << "\n\t passWindow3 = " << passWindow3
+                           << "\n\t pass W1 || W2 |W3| = " << (passWindow1 || passWindow2 || passWindow3) << std::endl;
+
+    if (passWindow1 || passWindow2 || passWindow3) {
       return true;
     } else {
       return false;
