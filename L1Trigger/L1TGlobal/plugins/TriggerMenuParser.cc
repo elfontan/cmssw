@@ -1143,8 +1143,8 @@ bool l1t::TriggerMenuParser::parseMuon(L1TUtmCondition condMu, unsigned int chip
     unsigned int etaWindow1Lower = -1, etaWindow1Upper = -1;
     unsigned int etaWindow2Lower = -1, etaWindow2Upper = -1;
     unsigned int etaWindow3Lower = -1, etaWindow3Upper = -1;
-    // Up to five index cuts can be implemented: at the moment this cut is used only for muons (muon monitorin seeds to distinguish BMTF, OMTF, EMTF)  
-    int cntIndex = 0;
+    // EF: Up to five index cuts can be implemented: at the moment this cut is used only for muons (muon monitorin seeds to distinguish BMTF, OMTF, EMTF)  
+    // int cntIndex = 0;
     unsigned int indexWindow1Lower = -1, indexWindow1Upper = -1, indexWindow2Lower = -1, indexWindow2Upper = -1;
     int cntPhi = 0;
     unsigned int phiWindow1Lower = -1, phiWindow1Upper = -1, phiWindow2Lower = -1, phiWindow2Upper = -1;
@@ -1153,105 +1153,113 @@ bool l1t::TriggerMenuParser::parseMuon(L1TUtmCondition condMu, unsigned int chip
     int charge = -1;               //default value is to ignore unless specified
     int qualityLUT = 0xFFFF;       //default is to ignore unless specified.
 
+    std::vector<MuonTemplate::Window> etaWindows;
+    std::vector<MuonTemplate::Window> tfMuonIndexWindows;
+
     const std::vector<L1TUtmCut>& cuts = object.getCuts();
     for (size_t kk = 0; kk < cuts.size(); kk++) {
       const L1TUtmCut& cut = cuts.at(kk);
 
       switch (cut.getCutType()) {
-        case esCutType::UnconstrainedPt:
-          lowerUnconstrainedPtInd = cut.getMinimum().index;
-          upperUnconstrainedPtInd = cut.getMaximum().index;
-          break;
-
-        case esCutType::ImpactParameter:
-          lowerImpactParameterInd = cut.getMinimum().index;
-          upperImpactParameterInd = cut.getMaximum().index;
-          impactParameterLUT = l1tstr2int(cut.getData());
-          break;
-
-        case esCutType::Threshold:
+      case esCutType::UnconstrainedPt:
+	lowerUnconstrainedPtInd = cut.getMinimum().index;
+	upperUnconstrainedPtInd = cut.getMaximum().index;
+	break;
+	
+      case esCutType::ImpactParameter:
+	lowerImpactParameterInd = cut.getMinimum().index;
+	upperImpactParameterInd = cut.getMaximum().index;
+	impactParameterLUT = l1tstr2int(cut.getData());
+	break;
+	
+      case esCutType::Threshold:
           lowerThresholdInd = cut.getMinimum().index;
           upperThresholdInd = cut.getMaximum().index;
           break;
+	  
+      case esCutType::Slice:
+	lowerIndexInd = int(cut.getMinimum().value);
+	upperIndexInd = int(cut.getMaximum().value);
+	break;
+	  
+      case esCutType::Eta: {
+	if (cntEta == 0) {
+	  etaWindow1Lower = cut.getMinimum().index;
+	  etaWindow1Upper = cut.getMaximum().index;
+	} else if (cntEta == 1) {
+	  etaWindow2Lower = cut.getMinimum().index;
+	  etaWindow2Upper = cut.getMaximum().index;
+	} else if (cntEta == 2) {
+	  etaWindow3Lower = cut.getMinimum().index;
+	  etaWindow3Upper = cut.getMaximum().index;
+	} else {
+	  edm::LogError("TriggerMenuParser")
+	    << "Too Many Eta Cuts for muon-condition (" << particle << ")" << std::endl;
+	  return false;
+	}
+	cntEta++;
+      } break;
+	
+	/*case esCutType::Index: {
+	if (cntIndex == 0) {
+	  indexWindow1Lower = cut.getMinimum().index;
+	  indexWindow1Upper = cut.getMaximum().index;
+	} else if (cntIndex == 1) {
+	  indexWindow2Lower = cut.getMinimum().index;
+	  indexWindow2Upper = cut.getMaximum().index;
+	} else {
+	  edm::LogError("TriggerMenuParser")
+	    << "Too Many Index Cuts for muon-condition (" << particle << ")" << std::endl;
+	  return false;
+	}
+	cntIndex++;
+      } break;
+	*/
 
-        case esCutType::Slice:
-          lowerIndexInd = int(cut.getMinimum().value);
-          upperIndexInd = int(cut.getMaximum().value);
-          break;
-
-        case esCutType::Eta: {
-          if (cntEta == 0) {
-            etaWindow1Lower = cut.getMinimum().index;
-            etaWindow1Upper = cut.getMaximum().index;
-          } else if (cntEta == 1) {
-            etaWindow2Lower = cut.getMinimum().index;
-            etaWindow2Upper = cut.getMaximum().index;
-          } else if (cntEta == 2) {
-            etaWindow3Lower = cut.getMinimum().index;
-            etaWindow3Upper = cut.getMaximum().index;
-          } else {
-            edm::LogError("TriggerMenuParser")
-                << "Too Many Eta Cuts for muon-condition (" << particle << ")" << std::endl;
-            return false;
-          }
-          cntEta++;
-        } break;
-
-        case esCutType::Index: {
-          if (cntIndex == 0) {
-            indexWindow1Lower = cut.getMinimum().index;
-            indexWindow1Upper = cut.getMaximum().index;
-          } else if (cntIndex == 1) {
-            indexWindow2Lower = cut.getMinimum().index;
-            indexWindow2Upper = cut.getMaximum().index;
-          } else {
-            edm::LogError("TriggerMenuParser")
-                << "Too Many Index Cuts for muon-condition (" << particle << ")" << std::endl;
-            return false;
-          }
-          cntIndex++;
-
-        } break;
-
-        case esCutType::Phi: {
-          if (cntPhi == 0) {
-            phiWindow1Lower = cut.getMinimum().index;
-            phiWindow1Upper = cut.getMaximum().index;
-          } else if (cntPhi == 1) {
-            phiWindow2Lower = cut.getMinimum().index;
-            phiWindow2Upper = cut.getMaximum().index;
-          } else {
-            edm::LogError("TriggerMenuParser")
-                << "Too Many Phi Cuts for muon-condition (" << particle << ")" << std::endl;
-            return false;
-          }
-          cntPhi++;
-
-        } break;
-
-        case esCutType::Charge:
-          if (cut.getData() == "positive")
-            charge = 0;
-          else if (cut.getData() == "negative")
-            charge = 1;
-          else
-            charge = -1;
-          break;
-        case esCutType::Quality:
-
-          qualityLUT = l1tstr2int(cut.getData());
-
-          break;
-        case esCutType::Isolation: {
-          isolationLUT = l1tstr2int(cut.getData());
-
-        } break;
-        default:
-          break;
+	//case esCutType::Eta: {
+	//etaWindows.push_back({cut.getMinimum().index, cut.getMaximum().index});
+	//} break;
+      case esCutType::Index: {
+	tfMuonIndexWindows.push_back({cut.getMinimum().index, cut.getMaximum().index});
+      } break;
+	
+      case esCutType::Phi: {
+	if (cntPhi == 0) {
+	  phiWindow1Lower = cut.getMinimum().index;
+	  phiWindow1Upper = cut.getMaximum().index;
+	} else if (cntPhi == 1) {
+	  phiWindow2Lower = cut.getMinimum().index;
+	  phiWindow2Upper = cut.getMaximum().index;
+	} else {
+	  edm::LogError("TriggerMenuParser")
+	    << "Too Many Phi Cuts for muon-condition (" << particle << ")" << std::endl;
+	  return false;
+	}
+	cntPhi++;
+	
+      } break;
+	
+      case esCutType::Charge:
+	if (cut.getData() == "positive")
+	  charge = 0;
+	else if (cut.getData() == "negative")
+	  charge = 1;
+	else
+	  charge = -1;
+	break;
+      case esCutType::Quality:
+	qualityLUT = l1tstr2int(cut.getData());
+	break;
+      case esCutType::Isolation: {
+	isolationLUT = l1tstr2int(cut.getData());
+      } break;
+	
+      default:
+	break;
       }  //end switch
-
+      
     }  //end loop over cuts
-
+    
     // Set the parameter cuts
     objParameter[cnt].unconstrainedPtHigh = upperUnconstrainedPtInd;
     objParameter[cnt].unconstrainedPtLow = lowerUnconstrainedPtInd;
@@ -1290,6 +1298,9 @@ bool l1t::TriggerMenuParser::parseMuon(L1TUtmCondition condMu, unsigned int chip
     objParameter[cnt].charge = charge;
     objParameter[cnt].qualityLUT = qualityLUT;
     objParameter[cnt].isolationLUT = isolationLUT;
+
+    objParameter[cnt].etaWindows = etaWindows;
+    objParameter[cnt].tfMuonIndexWindows = tfMuonIndexWindows;
 
     cnt++;
   }  //end loop over objects
@@ -1413,6 +1424,9 @@ bool l1t::TriggerMenuParser::parseMuonCorr(const L1TUtmObject* corrMu, unsigned 
   int charge = -1;          //defaut is to ignore unless specified
   int qualityLUT = 0xFFFF;  //default is to ignore unless specified.
 
+  std::vector<MuonTemplate::Window> etaWindows;
+  std::vector<MuonTemplate::Window> tfMuonIndexWindows;
+
   const std::vector<L1TUtmCut>& cuts = corrMu->getCuts();
   for (size_t kk = 0; kk < cuts.size(); kk++) {
     const L1TUtmCut& cut = cuts.at(kk);
@@ -1455,8 +1469,15 @@ bool l1t::TriggerMenuParser::parseMuonCorr(const L1TUtmObject* corrMu, unsigned 
           return false;
         }
         cntEta++;
-
       } break;
+
+	//case esCutType::Eta: {
+	//etaWindows.push_back({cut.getMinimum().index, cut.getMaximum().index});
+	//} break;
+
+    case esCutType::Index: {
+      tfMuonIndexWindows.push_back({cut.getMinimum().index, cut.getMaximum().index});
+    } break;
 
       case esCutType::Phi: {
         if (cntPhi == 0) {
@@ -1471,7 +1492,6 @@ bool l1t::TriggerMenuParser::parseMuonCorr(const L1TUtmObject* corrMu, unsigned 
           return false;
         }
         cntPhi++;
-
       } break;
 
       case esCutType::Charge:
@@ -1530,6 +1550,9 @@ bool l1t::TriggerMenuParser::parseMuonCorr(const L1TUtmObject* corrMu, unsigned 
   objParameter[0].charge = charge;
   objParameter[0].qualityLUT = qualityLUT;
   objParameter[0].isolationLUT = isolationLUT;
+
+  objParameter[0].etaWindows = etaWindows;
+  objParameter[0].tfMuonIndexWindows = tfMuonIndexWindows;
 
   // object types - all muons
   std::vector<GlobalObject> objType(nrObj, gtMu);

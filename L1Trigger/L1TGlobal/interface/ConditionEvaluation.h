@@ -120,6 +120,11 @@ namespace l1t {
                              const Type1& W3beginR,
                              const Type1& W3endR,
                              const unsigned int nEtaBits) const;
+    /// check if a value is in a given range
+    template <class Type1>
+    const bool checkWindowsEta(const unsigned int bitNumber,
+				       const std::vector<Type1>& windows) const;
+
 
     /// check if a value is in a given range and outside of a veto range
     template <class Type1>
@@ -152,6 +157,11 @@ namespace l1t {
                                   const unsigned int obj2Phi,
                                   const Type1& lowerR,
                                   const Type1& upperR) const;
+
+    /// check if a value is in a given range
+    template <class Type1>
+      const bool checkWindowsTfMuonIndex(const unsigned int bitNumber,
+				       const std::vector<Type1>& windows) const;
 
   protected:
     /// maximum number of objects received for the evaluation of the condition
@@ -397,7 +407,7 @@ namespace l1t {
                                                 const Type1& W1endR,
                                                 const Type1& W2beginR,
                                                 const Type1& W2endR) const {
-    // set condtion to true if beginR==endR = default -1
+    // set condition to true if beginR==endR = default -1
     if (W1beginR == W1endR && W1beginR == (Type1)-1) {
       return true;
     }
@@ -466,7 +476,7 @@ namespace l1t {
                                                      const Type1& lowerR,
                                                      const Type1& upperR,
                                                      const unsigned int nEtaBits) const {
-    /*   // set condtion to true if beginR==endR = default -1 */
+    /*   // set condition to true if beginR==endR = default -1 */
     /*   if( beginR==endR && beginR==-1 ){ */
     /*     return true; */
     /*   } */
@@ -544,6 +554,34 @@ namespace l1t {
       return false;
     }
   }
+
+ template <class Type1>
+   const bool ConditionEvaluation::checkWindowsEta(const unsigned int value,
+							 const std::vector<Type1>& windows) const {
+   if (windows.empty()) {
+     return true;
+   }
+   for (const auto& window : windows) {
+     if ((window.lower <= value) and (value <= window.upper)) {
+       return true;
+     }
+   }
+   return false;
+ }
+
+ template <class Type1>
+   const bool ConditionEvaluation::checkWindowsTfMuonIndex(const unsigned int value,
+							 const std::vector<Type1>& windows) const {
+   if (windows.empty()) {
+     return true;
+   }
+   for (const auto& window : windows) {
+     if ((window.lower <= value) and (value <= window.upper)) {
+       return true;
+     }
+   }
+   return false;
+ }
 
 }  // namespace l1t
 #endif

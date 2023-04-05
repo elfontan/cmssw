@@ -499,6 +499,18 @@ const bool l1t::MuCondition::checkObjectParameter(const int iCondition,
     LogDebug("L1TGlobal") << "\t\t l1t::Candidate failed isolation requirement" << std::endl;
     return false;
   }
+  // check eta window: up to five cuts are allowed
+  // NOTE that three cuts are used for the Run 3 upt muon seeds
+  if (!checkWindowsEta(cand.eta(), objPar.etaWindows)) {
+    LogDebug("L1TGlobal") << "\t\t l1t::Candidate failed checkWindowsEta" << std::endl;
+    return false;
+  }
+
+  // check muon TF index
+  if (!checkWindowsTfMuonIndex(cand.tfMuonIndex(), objPar.tfMuonIndexWindows)) {
+    LogDebug("L1TGlobal") << "\t\t l1t::Candidate failed checkWindowsTfMuonIndex" << std::endl;
+    return false;
+  }
 
   // A number of values is required to trigger (at least one).
   // "Don't care" means that all values are allowed.
