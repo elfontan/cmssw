@@ -470,7 +470,8 @@ const bool l1t::CaloCondition::checkObjectParameter(const int iCondition,
                         << "\n\t condRelativeBx = " << m_gtCaloTemplate->condRelativeBx() << "\n ObjectParameter : "
                         << "\n\t etThreshold = " << objPar.etLowThreshold << " - " << objPar.etHighThreshold
                         << "\n\t indexRange  = " << objPar.indexLow << " - " << objPar.indexHigh
-                        << "\n\t etaRange    = " << objPar.etaRange << "\n\t phiRange    = " << objPar.phiRange
+                        //<< "\n\t etaRange    = " << objPar.etaRange 
+			<< "\n\t phiRange    = " << objPar.phiRange
                         << "\n\t isolationLUT= " << objPar.isolationLUT << std::endl;
 
   LogDebug("L1TGlobal") << "\n l1t::Candidate : "
@@ -489,8 +490,15 @@ const bool l1t::CaloCondition::checkObjectParameter(const int iCondition,
     return false;
   }
 
-  // check eta
-  if (!checkRangeEta(cand.hwEta(),
+  // check eta window: up to five cuts are allowed                                                                         
+  // NOTE that at the moment three cuts are used only for the Run 3 upt muon seeds           
+  if (!checkRangeEta(cand.hwEta(), objPar.etaWindows)) {
+    LogDebug("L1TGlobal") << "\t\t l1t::Candidate failed checkRangeEta" << std::endl;
+    return false;
+  }
+
+  // EF check eta
+  /*if (!checkRangeEta(cand.hwEta(),
                      objPar.etaWindow1Lower,
                      objPar.etaWindow1Upper,
                      objPar.etaWindow2Lower,
@@ -501,6 +509,7 @@ const bool l1t::CaloCondition::checkObjectParameter(const int iCondition,
     LogDebug("L1TGlobal") << "\t\t l1t::Candidate failed checkRange(eta)" << std::endl;
     return false;
   }
+  */
 
   //     if (!checkBit(objPar.etaRange, cand.hwEta())) {
   //         return false;

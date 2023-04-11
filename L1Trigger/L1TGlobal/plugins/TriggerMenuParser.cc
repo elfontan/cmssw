@@ -1138,23 +1138,26 @@ bool l1t::TriggerMenuParser::parseMuon(L1TUtmCondition condMu, unsigned int chip
     int lowerThresholdInd = 0;
     int upperIndexInd = -1;
     int lowerIndexInd = 0;
+
     // Up to five eta cuts can be implemented: at the moment three eta cuts are used only for muons (upt seeds for Run 3) 
+    /*EF
     int cntEta = 0;
     unsigned int etaWindow1Lower = -1, etaWindow1Upper = -1;
     unsigned int etaWindow2Lower = -1, etaWindow2Upper = -1;
     unsigned int etaWindow3Lower = -1, etaWindow3Upper = -1;
-    // EF: Up to five index cuts can be implemented: at the moment this cut is used only for muons (muon monitorin seeds to distinguish BMTF, OMTF, EMTF)  
+    // EF: Up to five index cuts can be implemented: at the moment this cut is used only for muons (muon monitoring seeds to distinguish BMTF, OMTF, EMTF)  
     // int cntIndex = 0;
     unsigned int indexWindow1Lower = -1, indexWindow1Upper = -1, indexWindow2Lower = -1, indexWindow2Upper = -1;
+    */
+    std::vector<MuonTemplate::Window> etaWindows;      
+    std::vector<MuonTemplate::Window> tfMuonIndexWindows;
+
     int cntPhi = 0;
     unsigned int phiWindow1Lower = -1, phiWindow1Upper = -1, phiWindow2Lower = -1, phiWindow2Upper = -1;
     int isolationLUT = 0xF;        //default is to ignore unless specified.
     int impactParameterLUT = 0xF;  //default is to ignore unless specified
     int charge = -1;               //default value is to ignore unless specified
     int qualityLUT = 0xFFFF;       //default is to ignore unless specified.
-
-    std::vector<MuonTemplate::Window> etaWindows;
-    std::vector<MuonTemplate::Window> tfMuonIndexWindows;
 
     const std::vector<L1TUtmCut>& cuts = object.getCuts();
     for (size_t kk = 0; kk < cuts.size(); kk++) {
@@ -1182,6 +1185,7 @@ bool l1t::TriggerMenuParser::parseMuon(L1TUtmCondition condMu, unsigned int chip
 	upperIndexInd = int(cut.getMaximum().value);
 	break;
 	  
+	/*EF 
       case esCutType::Eta: {
 	if (cntEta == 0) {
 	  etaWindow1Lower = cut.getMinimum().index;
@@ -1200,7 +1204,7 @@ bool l1t::TriggerMenuParser::parseMuon(L1TUtmCondition condMu, unsigned int chip
 	cntEta++;
       } break;
 	
-	/*case esCutType::Index: {
+      case esCutType::Index: {
 	if (cntIndex == 0) {
 	  indexWindow1Lower = cut.getMinimum().index;
 	  indexWindow1Upper = cut.getMaximum().index;
@@ -1216,10 +1220,13 @@ bool l1t::TriggerMenuParser::parseMuon(L1TUtmCondition condMu, unsigned int chip
       } break;
 	*/
 
-	//case esCutType::Eta: {
-	//etaWindows.push_back({cut.getMinimum().index, cut.getMaximum().index});
-	//} break;
+      case esCutType::Eta: {
+	std::cout << "Checking etaWindows! Minimum:  " <<cut.getMinimum().index << " and Maximum: " <<  cut.getMaximum().index << std::endl; 
+	etaWindows.push_back({cut.getMinimum().index, cut.getMaximum().index});
+      } break;
+
       case esCutType::Index: {
+	std::cout << "Checking tfMuonIndexWindows! Minimum:  " <<cut.getMinimum().index << " and Maximum: " <<  cut.getMaximum().index << std::endl; 
 	tfMuonIndexWindows.push_back({cut.getMinimum().index, cut.getMaximum().index});
       } break;
 	
@@ -1273,6 +1280,7 @@ bool l1t::TriggerMenuParser::parseMuon(L1TUtmCondition condMu, unsigned int chip
     objParameter[cnt].indexHigh = upperIndexInd;
     objParameter[cnt].indexLow = lowerIndexInd;
 
+    /*EF 
     objParameter[cnt].etaWindow1Lower = etaWindow1Lower;
     objParameter[cnt].etaWindow1Upper = etaWindow1Upper;
     objParameter[cnt].etaWindow2Lower = etaWindow2Lower;
@@ -1284,6 +1292,9 @@ bool l1t::TriggerMenuParser::parseMuon(L1TUtmCondition condMu, unsigned int chip
     objParameter[cnt].indexWindow1Upper = indexWindow1Upper;
     objParameter[cnt].indexWindow2Lower = indexWindow2Lower;
     objParameter[cnt].indexWindow2Upper = indexWindow2Upper;
+    */
+    objParameter[cnt].etaWindows = etaWindows;
+    objParameter[cnt].tfMuonIndexWindows = tfMuonIndexWindows;
 
     objParameter[cnt].phiWindow1Lower = phiWindow1Lower;
     objParameter[cnt].phiWindow1Upper = phiWindow1Upper;
@@ -1298,9 +1309,6 @@ bool l1t::TriggerMenuParser::parseMuon(L1TUtmCondition condMu, unsigned int chip
     objParameter[cnt].charge = charge;
     objParameter[cnt].qualityLUT = qualityLUT;
     objParameter[cnt].isolationLUT = isolationLUT;
-
-    objParameter[cnt].etaWindows = etaWindows;
-    objParameter[cnt].tfMuonIndexWindows = tfMuonIndexWindows;
 
     cnt++;
   }  //end loop over objects
@@ -1403,7 +1411,7 @@ bool l1t::TriggerMenuParser::parseMuonCorr(const L1TUtmObject* corrMu, unsigned 
   //  BLW TO DO: This needs to be added to the Object Parameters
   relativeBx = corrMu->getBxOffset();
 
-  //  Loop over the cuts for this object
+  // Loop over the cuts for this object
   int upperUnconstrainedPtInd = -1;  // Added for displaced muons
   int lowerUnconstrainedPtInd = 0;   // Added for displaced muons
   int upperImpactParameterInd = -1;  // Added for displaced muons
@@ -1413,19 +1421,22 @@ bool l1t::TriggerMenuParser::parseMuonCorr(const L1TUtmObject* corrMu, unsigned 
   int lowerThresholdInd = 0;
   int upperIndexInd = -1;
   int lowerIndexInd = 0;
-  // Up to five eta cuts can be implemented: at the moment three eta cuts are used only for muons (upt seeds for Run 3)                                             
+  
+  /*
+  // EF Up to five eta cuts can be implemented: at the moment three eta cuts are used only for muons (upt seeds for Run 3)                
   int cntEta = 0;
   unsigned int etaWindow1Lower = -1, etaWindow1Upper = -1;
   unsigned int etaWindow2Lower = -1, etaWindow2Upper = -1;
   unsigned int etaWindow3Lower = -1, etaWindow3Upper = -1;
+  */
+  std::vector<MuonTemplate::Window> etaWindows;
+  std::vector<MuonTemplate::Window> tfMuonIndexWindows;
+
   int cntPhi = 0;
   unsigned int phiWindow1Lower = -1, phiWindow1Upper = -1, phiWindow2Lower = -1, phiWindow2Upper = -1;
   int isolationLUT = 0xF;   //default is to ignore unless specified.
   int charge = -1;          //defaut is to ignore unless specified
   int qualityLUT = 0xFFFF;  //default is to ignore unless specified.
-
-  std::vector<MuonTemplate::Window> etaWindows;
-  std::vector<MuonTemplate::Window> tfMuonIndexWindows;
 
   const std::vector<L1TUtmCut>& cuts = corrMu->getCuts();
   for (size_t kk = 0; kk < cuts.size(); kk++) {
@@ -1453,6 +1464,7 @@ bool l1t::TriggerMenuParser::parseMuonCorr(const L1TUtmObject* corrMu, unsigned 
         upperIndexInd = int(cut.getMaximum().value);
         break;
 
+	/*EF
       case esCutType::Eta: {
         if (cntEta == 0) {
           etaWindow1Lower = cut.getMinimum().index;
@@ -1470,14 +1482,14 @@ bool l1t::TriggerMenuParser::parseMuonCorr(const L1TUtmObject* corrMu, unsigned 
         }
         cntEta++;
       } break;
+	*/
+      case esCutType::Eta: {
+	etaWindows.push_back({cut.getMinimum().index, cut.getMaximum().index});
+      } break;
 
-	//case esCutType::Eta: {
-	//etaWindows.push_back({cut.getMinimum().index, cut.getMaximum().index});
-	//} break;
-
-    case esCutType::Index: {
-      tfMuonIndexWindows.push_back({cut.getMinimum().index, cut.getMaximum().index});
-    } break;
+      case esCutType::Index: {
+	tfMuonIndexWindows.push_back({cut.getMinimum().index, cut.getMaximum().index});
+      } break;	
 
       case esCutType::Phi: {
         if (cntPhi == 0) {
@@ -1530,18 +1542,22 @@ bool l1t::TriggerMenuParser::parseMuonCorr(const L1TUtmObject* corrMu, unsigned 
   objParameter[0].indexHigh = upperIndexInd;
   objParameter[0].indexLow = lowerIndexInd;
 
+  /*EF
   objParameter[0].etaWindow1Lower = etaWindow1Lower;
   objParameter[0].etaWindow1Upper = etaWindow1Upper;
   objParameter[0].etaWindow2Lower = etaWindow2Lower;
   objParameter[0].etaWindow2Upper = etaWindow2Upper;
   objParameter[0].etaWindow3Lower = etaWindow3Lower;
   objParameter[0].etaWindow3Upper = etaWindow3Upper;
+  */
+  objParameter[0].etaWindows = etaWindows;
+  objParameter[0].tfMuonIndexWindows = tfMuonIndexWindows;
 
   objParameter[0].phiWindow1Lower = phiWindow1Lower;
   objParameter[0].phiWindow1Upper = phiWindow1Upper;
   objParameter[0].phiWindow2Lower = phiWindow2Lower;
   objParameter[0].phiWindow2Upper = phiWindow2Upper;
-
+  
   // BLW TO DO: Do we need these anymore?  Drop them?
   objParameter[0].enableMip = false;   //tmpMip[i];
   objParameter[0].enableIso = false;   //tmpEnableIso[i];
@@ -1550,9 +1566,6 @@ bool l1t::TriggerMenuParser::parseMuonCorr(const L1TUtmObject* corrMu, unsigned 
   objParameter[0].charge = charge;
   objParameter[0].qualityLUT = qualityLUT;
   objParameter[0].isolationLUT = isolationLUT;
-
-  objParameter[0].etaWindows = etaWindows;
-  objParameter[0].tfMuonIndexWindows = tfMuonIndexWindows;
 
   // object types - all muons
   std::vector<GlobalObject> objType(nrObj, gtMu);
@@ -1819,11 +1832,14 @@ bool l1t::TriggerMenuParser::parseCalo(L1TUtmCondition condCalo, unsigned int ch
     int lowerThresholdInd = 0;
     int upperIndexInd = -1;
     int lowerIndexInd = 0;
-    // Up to five eta cuts can be implemented: at the moment three eta cuts are used only for muons (upt seeds for Run 3)                   
-    int cntEta = 0;
-    unsigned int etaWindow1Lower = -1, etaWindow1Upper = -1;
-    unsigned int etaWindow2Lower = -1, etaWindow2Upper = -1;
-    unsigned int etaWindow3Lower = -1, etaWindow3Upper = -1;
+
+    //EF Up to five eta cuts can be implemented: at the moment three eta cuts are used only for muons (upt seeds for Run 3)                   
+    //int cntEta = 0;
+    //unsigned int etaWindow1Lower = -1, etaWindow1Upper = -1;
+    //unsigned int etaWindow2Lower = -1, etaWindow2Upper = -1;
+    //unsigned int etaWindow3Lower = -1, etaWindow3Upper = -1;
+    std::vector<CaloTemplate::Window> etaWindows;
+
     int cntPhi = 0;
     unsigned int phiWindow1Lower = -1, phiWindow1Upper = -1, phiWindow2Lower = -1, phiWindow2Upper = -1;
     int isolationLUT = 0xF;  //default is to ignore isolation unless specified.
@@ -1837,15 +1853,20 @@ bool l1t::TriggerMenuParser::parseCalo(L1TUtmCondition condCalo, unsigned int ch
       const L1TUtmCut& cut = cuts.at(kk);
 
       switch (cut.getCutType()) {
-        case esCutType::Threshold:
-          lowerThresholdInd = cut.getMinimum().index;
-          upperThresholdInd = cut.getMaximum().index;
-          break;
-        case esCutType::Slice:
-          lowerIndexInd = int(cut.getMinimum().value);
-          upperIndexInd = int(cut.getMaximum().value);
-          break;
-        case esCutType::Eta: {
+      case esCutType::Threshold:
+	lowerThresholdInd = cut.getMinimum().index;
+	upperThresholdInd = cut.getMaximum().index;
+	break;
+      case esCutType::Slice:
+	lowerIndexInd = int(cut.getMinimum().value);
+	upperIndexInd = int(cut.getMaximum().value);
+	break;
+	
+      case esCutType::Eta: {
+	etaWindows.push_back({cut.getMinimum().index, cut.getMaximum().index});
+      } break;
+	
+	/*  case esCutType::Eta: {
           if (cntEta == 0) {
             etaWindow1Lower = cut.getMinimum().index;
             etaWindow1Upper = cut.getMaximum().index;
@@ -1863,7 +1884,7 @@ bool l1t::TriggerMenuParser::parseCalo(L1TUtmCondition condCalo, unsigned int ch
           cntEta++;
 
         } break;
-
+	*/
         case esCutType::Phi: {
           if (cntPhi == 0) {
             phiWindow1Lower = cut.getMinimum().index;
@@ -1908,12 +1929,15 @@ bool l1t::TriggerMenuParser::parseCalo(L1TUtmCondition condCalo, unsigned int ch
     objParameter[cnt].etLowThreshold = lowerThresholdInd;
     objParameter[cnt].indexHigh = upperIndexInd;
     objParameter[cnt].indexLow = lowerIndexInd;
+    /*EF
     objParameter[cnt].etaWindow1Lower = etaWindow1Lower;
     objParameter[cnt].etaWindow1Upper = etaWindow1Upper;
     objParameter[cnt].etaWindow2Lower = etaWindow2Lower;
     objParameter[cnt].etaWindow2Upper = etaWindow2Upper;
     objParameter[cnt].etaWindow3Lower = etaWindow3Lower;
     objParameter[cnt].etaWindow3Upper = etaWindow3Upper;
+    */
+    objParameter[cnt].etaWindows = etaWindows;
     objParameter[cnt].phiWindow1Lower = phiWindow1Lower;
     objParameter[cnt].phiWindow1Upper = phiWindow1Upper;
     objParameter[cnt].phiWindow2Lower = phiWindow2Lower;
@@ -1926,10 +1950,10 @@ bool l1t::TriggerMenuParser::parseCalo(L1TUtmCondition condCalo, unsigned int ch
     LogDebug("TriggerMenuParser") << "\n      Calo ET high thresholds (hex) for calo object " << caloObjType << " "
                                   << cnt << " = " << std::hex << objParameter[cnt].etLowThreshold << " - "
                                   << objParameter[cnt].etHighThreshold
-                                  << "\n      etaWindow Lower / Upper for calo object " << cnt << " = 0x"
-                                  << objParameter[cnt].etaWindow1Lower << " / 0x" << objParameter[cnt].etaWindow1Upper
-                                  << "\n      etaWindowVeto Lower / Upper for calo object " << cnt << " = 0x"
-                                  << objParameter[cnt].etaWindow2Lower << " / 0x" << objParameter[cnt].etaWindow2Upper
+      //EF << "\n      etaWindow Lower / Upper for calo object " << cnt << " = 0x"
+      //EF                             << objParameter[cnt].etaWindow1Lower << " / 0x" << objParameter[cnt].etaWindow1Upper
+      //EF                            << "\n      etaWindowVeto Lower / Upper for calo object " << cnt << " = 0x"
+      //EF                        << objParameter[cnt].etaWindow2Lower << " / 0x" << objParameter[cnt].etaWindow2Upper
                                   << "\n      phiWindow Lower / Upper for calo object " << cnt << " = 0x"
                                   << objParameter[cnt].phiWindow1Lower << " / 0x" << objParameter[cnt].phiWindow1Upper
                                   << "\n      phiWindowVeto Lower / Upper for calo object " << cnt << " = 0x"
@@ -2062,14 +2086,19 @@ bool l1t::TriggerMenuParser::parseCaloCorr(const L1TUtmObject* corrCalo, unsigne
   int lowerThresholdInd = 0;
   int upperIndexInd = -1;
   int lowerIndexInd = 0;
-  // Up to five eta cuts can be implemented: at the moment three eta cuts are used only for muons (upt seeds for Run 3)                                             
+  /*
+  // EF Up to five eta cuts can be implemented: at the moment three eta cuts are used only for muons (upt seeds for Run 3)                              
   int cntEta = 0;
   unsigned int etaWindow1Lower = -1, etaWindow1Upper = -1;
   unsigned int etaWindow2Lower = -1, etaWindow2Upper = -1;
   unsigned int etaWindow3Lower = -1, etaWindow3Upper = -1;
+  */
+  std::vector<CaloTemplate::Window> etaWindows;
+
   int cntPhi = 0;
   unsigned int phiWindow1Lower = -1, phiWindow1Upper = -1, phiWindow2Lower = -1, phiWindow2Upper = -1;
   int isolationLUT = 0xF;  //default is to ignore isolation unless specified.
+
   int qualityLUT = 0xF;    //default is to ignore quality unless specified.
   int displacedLUT = 0x0;  // Added for LLP Jets:  single bit LUT:  { 0 = noLLP default, 1 = LLP }
                            // Note:  Currently assume that the hwQual() getter in L1Candidate provides the
@@ -2088,7 +2117,12 @@ bool l1t::TriggerMenuParser::parseCaloCorr(const L1TUtmObject* corrCalo, unsigne
         lowerIndexInd = int(cut.getMinimum().value);
         upperIndexInd = int(cut.getMaximum().value);
         break;
-      case esCutType::Eta: {
+
+      case esCutType::Eta:
+	etaWindows.push_back({cut.getMinimum().index, cut.getMaximum().index});
+	break;
+
+	/*EF case esCutType::Eta: {
         if (cntEta == 0) {
           etaWindow1Lower = cut.getMinimum().index;
           etaWindow1Upper = cut.getMaximum().index;
@@ -2106,11 +2140,12 @@ bool l1t::TriggerMenuParser::parseCaloCorr(const L1TUtmObject* corrCalo, unsigne
         cntEta++;
 
       } break;
-
+	*/
       case esCutType::Phi: {
         if (cntPhi == 0) {
           phiWindow1Lower = cut.getMinimum().index;
           phiWindow1Upper = cut.getMaximum().index;
+
         } else if (cntPhi == 1) {
           phiWindow2Lower = cut.getMinimum().index;
           phiWindow2Upper = cut.getMaximum().index;
@@ -2151,12 +2186,16 @@ bool l1t::TriggerMenuParser::parseCaloCorr(const L1TUtmObject* corrCalo, unsigne
   objParameter[0].etHighThreshold = upperThresholdInd;
   objParameter[0].indexHigh = upperIndexInd;
   objParameter[0].indexLow = lowerIndexInd;
+  /*EF
   objParameter[0].etaWindow1Lower = etaWindow1Lower;
   objParameter[0].etaWindow1Upper = etaWindow1Upper;
   objParameter[0].etaWindow2Lower = etaWindow2Lower;
   objParameter[0].etaWindow2Upper = etaWindow2Upper;
   objParameter[0].etaWindow3Lower = etaWindow3Lower;
   objParameter[0].etaWindow3Upper = etaWindow3Upper;
+  */
+  objParameter[0].etaWindows = etaWindows;
+
   objParameter[0].phiWindow1Lower = phiWindow1Lower;
   objParameter[0].phiWindow1Upper = phiWindow1Upper;
   objParameter[0].phiWindow2Lower = phiWindow2Lower;
@@ -2169,11 +2208,11 @@ bool l1t::TriggerMenuParser::parseCaloCorr(const L1TUtmObject* corrCalo, unsigne
   LogDebug("TriggerMenuParser") << "\n      Calo ET high threshold (hex) for calo object " << caloObjType << " "
                                 << " = " << std::hex << objParameter[0].etLowThreshold << " - "
                                 << objParameter[0].etHighThreshold << "\n      etaWindow Lower / Upper for calo object "
-                                << " = 0x" << objParameter[0].etaWindow1Lower << " / 0x"
-                                << objParameter[0].etaWindow1Upper
-                                << "\n      etaWindowVeto Lower / Upper for calo object "
-                                << " = 0x" << objParameter[0].etaWindow2Lower << " / 0x"
-                                << objParameter[0].etaWindow2Upper << "\n      phiWindow Lower / Upper for calo object "
+    //EF<< " = 0x" << objParameter[0].etaWindow1Lower << " / 0x"
+    //EF                        << objParameter[0].etaWindow1Upper
+    //EF                        << "\n      etaWindowVeto Lower / Upper for calo object "
+    //EF                        << " = 0x" << objParameter[0].etaWindow2Lower << " / 0x"
+    //EF                             << objParameter[0].etaWindow2Upper << "\n      phiWindow Lower / Upper for calo object "
                                 << " = 0x" << objParameter[0].phiWindow1Lower << " / 0x"
                                 << objParameter[0].phiWindow1Upper
                                 << "\n      phiWindowVeto Lower / Upper for calo object "
@@ -2374,8 +2413,30 @@ bool l1t::TriggerMenuParser::parseEnergySum(L1TUtmCondition condEnergySum, unsig
           upperThresholdInd = cut.getMaximum().index;
           break;
 
-        case esCutType::Eta:
-          break;
+      case esCutType::Eta:
+	break;
+	//case esCutType::Eta: {
+	//etaWindows.push_back({cut.getMinimum().index, cut.getMaximum().index});
+	//} break;
+	/*EF case esCutType::Eta: {
+        if (cntEta == 0) {
+          etaWindow1Lower = cut.getMinimum().index;
+          etaWindow1Upper = cut.getMaximum().index;
+        } else if (cntEta == 1) {
+          etaWindow2Lower = cut.getMinimum().index;
+          etaWindow2Upper = cut.getMaximum().index;
+        } else if (cntEta == 2) {
+          etaWindow3Lower = cut.getMinimum().index;
+          etaWindow3Upper = cut.getMaximum().index;
+        } else {
+          edm::LogError("TriggerMenuParser")
+              << "Too Many Eta Cuts for calo-condition (" << particle << ")" << std::endl;
+          return false;
+        }
+        cntEta++;
+
+      } break;
+	*/
 
         case esCutType::Phi: {
           if (cntPhi == 0) {
@@ -2545,35 +2606,35 @@ bool l1t::TriggerMenuParser::parseEnergySumCorr(const L1TUtmObject* corrESum, un
     const L1TUtmCut& cut = cuts.at(kk);
 
     switch (cut.getCutType()) {
-      case esCutType::Threshold:
-        lowerThresholdInd = cut.getMinimum().index;
-        upperThresholdInd = cut.getMaximum().index;
+    case esCutType::Threshold:
+      lowerThresholdInd = cut.getMinimum().index;
+      upperThresholdInd = cut.getMaximum().index;
         break;
-
-      case esCutType::Eta:
-        break;
-
-      case esCutType::Phi: {
-        if (cntPhi == 0) {
-          phiWindow1Lower = cut.getMinimum().index;
-          phiWindow1Upper = cut.getMaximum().index;
-        } else if (cntPhi == 1) {
-          phiWindow2Lower = cut.getMinimum().index;
-          phiWindow2Upper = cut.getMaximum().index;
-        } else {
-          edm::LogError("TriggerMenuParser") << "Too Many Phi Cuts for esum-condition (" << type << ")" << std::endl;
-          return false;
-        }
-        cntPhi++;
-
-      } break;
-
-      default:
-        break;
+	
+    case esCutType::Eta:
+      break;
+      
+    case esCutType::Phi: {
+      if (cntPhi == 0) {
+	phiWindow1Lower = cut.getMinimum().index;
+	phiWindow1Upper = cut.getMaximum().index;
+      } else if (cntPhi == 1) {
+	phiWindow2Lower = cut.getMinimum().index;
+	phiWindow2Upper = cut.getMaximum().index;
+      } else {
+	edm::LogError("TriggerMenuParser") << "Too Many Phi Cuts for esum-condition (" << type << ")" << std::endl;
+	return false;
+      }
+      cntPhi++;
+      
+    } break;
+      
+    default:
+      break;
     }  //end switch
-
+    
   }  //end loop over cuts
-
+  
   // Fill the object parameters
   objParameter[0].etLowThreshold = lowerThresholdInd;
   objParameter[0].etHighThreshold = upperThresholdInd;
@@ -2595,7 +2656,6 @@ bool l1t::TriggerMenuParser::parseEnergySumCorr(const L1TUtmObject* corrESum, un
   std::vector<GlobalObject> objType(nrObj, energySumObjType);
 
   // now create a new energySum condition
-
   EnergySumTemplate energySumCond(name);
 
   energySumCond.setCondType(cType);

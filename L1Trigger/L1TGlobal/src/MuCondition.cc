@@ -381,8 +381,9 @@ const bool l1t::MuCondition::checkObjectParameter(const int iCondition,
                         << objPar.ptHighThreshold << "\n\t ptLowThreshold  = 0x " << objPar.ptLowThreshold
                         << "\n\t indexHigh       = 0x " << objPar.indexHigh << "\n\t indexLow        = 0x "
                         << objPar.indexLow << "\n\t requestIso      = 0x " << objPar.requestIso
-                        << "\n\t enableIso       = 0x " << objPar.enableIso << "\n\t etaRange        = 0x "
-                        << objPar.etaRange << "\n\t phiLow          = 0x " << objPar.phiLow
+                        << "\n\t enableIso       = 0x " << objPar.enableIso 
+                        //<< "\n\t etaRange        = 0x " << objPar.etaRange 
+			<< "\n\t phiLow          = 0x " << objPar.phiLow
                         << "\n\t phiHigh         = 0x " << objPar.phiHigh << "\n\t phiWindow1Lower = 0x "
                         << objPar.phiWindow1Lower << "\n\t phiWindow1Upper = 0x " << objPar.phiWindow1Upper
                         << "\n\t phiWindow2Lower = 0x " << objPar.phiWindow2Lower << "\n\t phiWindow2Lower = 0x "
@@ -434,8 +435,31 @@ const bool l1t::MuCondition::checkObjectParameter(const int iCondition,
     return false;
   }
 
-  // check eta
-  if (!checkRangeEta(cand.hwEtaAtVtx(),
+  // check eta window: up to five cuts are allowed
+  // NOTE that three cuts are used only for the Run 3 upt muon seeds
+  std::cout << "\t\t l1t::MuCondition EtaRange= " << cand.hwEtaAtVtx() 
+    //<< " with eta windows: " << objPar.etaWindows
+	    << std::endl;
+
+  if (!checkRangeEta(cand.hwEtaAtVtx(), objPar.etaWindows)) {
+    std::cout << "\t\t l1t::Candidate failed checkRangeEta" << std::endl;
+    //LogDebug("L1TGlobal") << "\t\t l1t::Candidate failed checkRangeEta" << std::endl;
+    return false;
+  }
+
+  // check muon TF index: up to five cuts are allowed
+  // NOTE that the TrackFinder Index cut is for muon objects only 
+  std::cout << "\t\t l1t::MuCondition tfIndex= " << cand.tfMuonIndex() 
+    //<< " with tfMuonIndexWindows: " << objPar.tfMuonIndexWindows
+	    << std::endl;
+  if (!checkRangeTfMuonIndex(cand.tfMuonIndex(), objPar.tfMuonIndexWindows)) {
+    std::cout << "\t\t l1t::Candidate failed checkRangeTfMuonIndex" << std::endl;
+    //LogDebug("L1TGlobal") << "\t\t l1t::Candidate failed checkRangeTfMuonIndex" << std::endl;
+    return false;
+  }
+
+  // EF check eta
+  /*  if (!checkRangeEta(cand.hwEtaAtVtx(),
                      objPar.etaWindow1Lower,
                      objPar.etaWindow1Upper,
                      objPar.etaWindow2Lower,
@@ -499,16 +523,18 @@ const bool l1t::MuCondition::checkObjectParameter(const int iCondition,
     LogDebug("L1TGlobal") << "\t\t l1t::Candidate failed isolation requirement" << std::endl;
     return false;
   }
+
   // check eta window: up to five cuts are allowed
-  // NOTE that three cuts are used for the Run 3 upt muon seeds
-  if (!checkWindowsEta(cand.eta(), objPar.etaWindows)) {
-    LogDebug("L1TGlobal") << "\t\t l1t::Candidate failed checkWindowsEta" << std::endl;
+  // NOTE that three cuts are used only for the Run 3 upt muon seeds
+  if (!checkRangeEta(cand.eta(), objPar.etaWindows)) {
+    LogDebug("L1TGlobal") << "\t\t l1t::Candidate failed checkRangeEta" << std::endl;
     return false;
   }
 
-  // check muon TF index
-  if (!checkWindowsTfMuonIndex(cand.tfMuonIndex(), objPar.tfMuonIndexWindows)) {
-    LogDebug("L1TGlobal") << "\t\t l1t::Candidate failed checkWindowsTfMuonIndex" << std::endl;
+  // check muon TF index: up to five cuts are allowed
+  // NOTE that the TrackFinder Index cut is for muon objects only 
+  if (!checkRangeTfMuonIndex(cand.tfMuonIndex(), objPar.tfMuonIndexWindows)) {
+    LogDebug("L1TGlobal") << "\t\t l1t::Candidate failed checkRangeTfMuonIndex" << std::endl;
     return false;
   }
 

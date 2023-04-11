@@ -101,6 +101,8 @@ void MuonTemplate::print(std::ostream& myCout) const {
     myCout << "    phiWindow1Upper   =" << std::hex << m_objectParameter[i].phiWindow1Upper << std::endl;
     myCout << "    phiWindow2Lower   =" << std::hex << m_objectParameter[i].phiWindow2Lower << std::endl;
     myCout << "    phiWindow2Upper   =" << std::hex << m_objectParameter[i].phiWindow2Upper << std::endl;
+
+    /*EF 
     myCout << "    etaWindow1Lower   =" << std::hex << m_objectParameter[i].etaWindow1Lower << std::endl;
     myCout << "    etaWindow1Upper   =" << std::hex << m_objectParameter[i].etaWindow1Upper << std::endl;
     myCout << "    etaWindow2Lower   =" << std::hex << m_objectParameter[i].etaWindow2Lower << std::endl;
@@ -111,6 +113,7 @@ void MuonTemplate::print(std::ostream& myCout) const {
     myCout << "    indexWindow1Upper   =" << std::hex << m_objectParameter[i].indexWindow1Upper << std::endl;
     myCout << "    indexWindow2Lower   =" << std::hex << m_objectParameter[i].indexWindow2Lower << std::endl;
     myCout << "    indexWindow2Upper   =" << std::hex << m_objectParameter[i].indexWindow2Upper << std::endl;
+    */
   }
 
   if (wsc()) {

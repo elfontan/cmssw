@@ -78,25 +78,27 @@ public:
 
     int charge;
 
+    /*EF
     unsigned int etaWindow1Lower;
     unsigned int etaWindow1Upper;
     unsigned int etaWindow2Lower;
     unsigned int etaWindow2Upper;
     unsigned int etaWindow3Lower;
     unsigned int etaWindow3Upper;
-
     unsigned int indexWindow1Lower;
     unsigned int indexWindow1Upper;
     unsigned int indexWindow2Lower;
     unsigned int indexWindow2Upper;
+    */
+
+    std::vector<Window> etaWindows;
+    std::vector<Window> tfMuonIndexWindows;
 
     unsigned int phiWindow1Lower;
     unsigned int phiWindow1Upper;
     unsigned int phiWindow2Lower;
     unsigned int phiWindow2Upper;
 
-    std::vector<Window> etaWindows;
-    std::vector<Window> tfMuonIndexWindows;
   };
 
   // typedef for correlation parameters

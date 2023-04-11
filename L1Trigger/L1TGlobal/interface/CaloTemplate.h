@@ -57,6 +57,11 @@ public:
   CaloTemplate& operator=(const CaloTemplate&);
 
 public:
+  struct Window {
+    unsigned int lower;
+    unsigned int upper;
+  };
+
   /// typedef for a single object template
   struct ObjectParameter {
     unsigned int etLowThreshold;
@@ -70,12 +75,15 @@ public:
     unsigned int qualityLUT;
     unsigned int displacedLUT;  // Added for LLP Jets
 
+    /* EF 
     unsigned int etaWindow1Lower;
     unsigned int etaWindow1Upper;
     unsigned int etaWindow2Lower;
     unsigned int etaWindow2Upper;
     unsigned int etaWindow3Lower;
     unsigned int etaWindow3Upper;
+    */
+    std::vector<Window> etaWindows;
 
     unsigned int phiWindow1Lower;
     unsigned int phiWindow1Upper;
