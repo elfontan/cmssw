@@ -435,12 +435,7 @@ const bool l1t::MuCondition::checkObjectParameter(const int iCondition,
   }
 
   // check eta
-  if (!checkRangeEta(cand.hwEtaAtVtx(),
-                     objPar.etaWindow1Lower,
-                     objPar.etaWindow1Upper,
-                     objPar.etaWindow2Lower,
-                     objPar.etaWindow2Upper,
-                     8)) {
+  if (!checkRangeEta(cand.hwEtaAtVtx(), objPar.etaWindows, 8)) {
     LogDebug("L1TGlobal") << "\t\t l1t::Candidate failed checkRange(eta)" << std::endl;
     return false;
   }
@@ -484,6 +479,12 @@ const bool l1t::MuCondition::checkObjectParameter(const int iCondition,
   bool passIsoLUT = ((objPar.isolationLUT >> cand.hwIso()) & 1);
   if (!passIsoLUT) {
     LogDebug("L1TGlobal") << "\t\t l1t::Candidate failed isolation requirement" << std::endl;
+    return false;
+  }
+
+  // check muon TF index
+  if (!checkRangeTfMuonIndex(cand.tfMuonIndex(), objPar.tfMuonIndexWindows)) {
+    LogDebug("L1TGlobal") << "\t\t l1t::Candidate failed checkRange(tfMuonIndex)" << std::endl;
     return false;
   }
 
