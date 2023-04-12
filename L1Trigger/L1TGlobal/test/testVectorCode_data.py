@@ -110,7 +110,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '124X_dataRun3_Prompt_v4', '')
 # ----------------
 process.load('L1Trigger.L1TGlobal.GlobalParameters_cff')
 process.load("L1Trigger.L1TGlobal.TriggerMenu_cff")
-xmlMenu="L1Menu_Collisions2022_v1_4_0.xml"
+xmlMenu="L1Menu_Collisions2023_v1_0_1.xml"
 process.TriggerMenu.L1TriggerMenuFile = cms.string(xmlMenu)
 process.ESPreferL1TXML = cms.ESPrefer("L1TUtmTriggerMenuESProducer","TriggerMenu")
 
