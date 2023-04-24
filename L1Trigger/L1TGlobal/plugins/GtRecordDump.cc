@@ -37,6 +37,7 @@
 
 #include "DataFormats/L1Trigger/interface/EGamma.h"
 #include "DataFormats/L1Trigger/interface/Muon.h"
+#include "DataFormats/L1Trigger/interface/MuonShower.h" // added by RICK
 #include "DataFormats/L1Trigger/interface/Tau.h"
 #include "DataFormats/L1Trigger/interface/Jet.h"
 #include "DataFormats/L1Trigger/interface/EtSum.h"
@@ -72,6 +73,7 @@ namespace l1t {
     InputTag uGtExtInputTag;
     EDGetToken egToken;
     EDGetToken muToken;
+    EDGetToken muShowerToken; //added by RICK
     EDGetToken tauToken;
     EDGetToken jetToken;
     EDGetToken etsumToken;
@@ -82,14 +84,16 @@ namespace l1t {
     void dumpTestVectors(int bx,
                          std::ofstream& myCout,
                          Handle<BXVector<l1t::Muon>> muons,
-                         Handle<BXVector<l1t::EGamma>> egammas,
+			 Handle<BXVector<l1t::MuonShower>> muonShowers, // added by RICK
+			 Handle<BXVector<l1t::EGamma>> egammas,
                          Handle<BXVector<l1t::Tau>> taus,
                          Handle<BXVector<l1t::Jet>> jets,
                          Handle<BXVector<l1t::EtSum>> etsums,
                          Handle<BXVector<GlobalAlgBlk>> uGtAlg,
                          Handle<BXVector<GlobalExtBlk>> uGtExt);
 
-    cms_uint64_t formatMuon(std::vector<l1t::Muon>::const_iterator mu);
+    //cms_uint64_t formatMuon(std::vector<l1t::Muon>::const_iterator mu); //added by RICK
+    cms_uint64_t formatMuon(std::vector<l1t::Muon>::const_iterator mu, int muShowerBit); //added by RICK
     unsigned int formatEG(std::vector<l1t::EGamma>::const_iterator eg);
     unsigned int formatTau(std::vector<l1t::Tau>::const_iterator tau);
     unsigned int formatJet(std::vector<l1t::Jet>::const_iterator jet);
@@ -126,6 +130,7 @@ namespace l1t {
     uGtExtInputTag = iConfig.getParameter<InputTag>("uGtExtInputTag");
     egToken = consumes<BXVector<l1t::EGamma>>(iConfig.getParameter<InputTag>("egInputTag"));
     muToken = consumes<BXVector<l1t::Muon>>(iConfig.getParameter<InputTag>("muInputTag"));
+    muShowerToken = consumes<BXVector<l1t::MuonShower>>(iConfig.getParameter<InputTag>("muShowerInputTag")); // added by RICK
     tauToken = consumes<BXVector<l1t::Tau>>(iConfig.getParameter<InputTag>("tauInputTag"));
     jetToken = consumes<BXVector<l1t::Jet>>(iConfig.getParameter<InputTag>("jetInputTag"));
     etsumToken = consumes<BXVector<l1t::EtSum>>(iConfig.getParameter<InputTag>("etsumInputTag"));
@@ -158,6 +163,8 @@ namespace l1t {
     m_gtUtil = std::make_unique<L1TGlobalUtil>(
         iConfig, consumesCollector(), *this, uGtAlgInputTag, uGtExtInputTag, l1t::UseEventSetupIn::Event);
     m_gtUtil->OverridePrescalesAndMasks(preScaleFileName, preScColumn);
+
+    std::cout << "#EF GtRecordDump" << std::endl;
   }
 
   // loop over events
@@ -168,6 +175,9 @@ namespace l1t {
 
     Handle<BXVector<l1t::Muon>> muons;
     iEvent.getByToken(muToken, muons);
+
+    Handle<BXVector<l1t::MuonShower>> muonShowers; //added by RICK
+    iEvent.getByToken(muShowerToken, muonShowers); //added by RICK
 
     Handle<BXVector<l1t::Tau>> taus;
     iEvent.getByToken(tauToken, taus);
@@ -190,6 +200,7 @@ namespace l1t {
     //Fill the L1 result maps
     m_gtUtil->retrieveL1(iEvent, evSetup, uGtAlgToken);
 
+    std::cout << "#EF retrieved L1 data " << endl;
     LogDebug("GtRecordDump") << "retrieved L1 data " << endl;
 
     // grab the map for the final decisions
@@ -199,6 +210,7 @@ namespace l1t {
     const std::vector<std::pair<std::string, double>> prescales = m_gtUtil->prescales();
     const std::vector<std::pair<std::string, std::vector<int>>> masks = m_gtUtil->masks();
 
+    std::cout << "#EF retrieved all event vectors " << endl;
     LogDebug("GtRecordDump") << "retrieved all event vectors " << endl;
 
     // Dump the results
@@ -211,6 +223,8 @@ namespace l1t {
            << endl;
     }
     for (unsigned int i = 0; i < initialDecisions.size(); i++) {
+      //std::cout << "#EF Initial decision  " << endl; //OK
+
       // get the name and trigger result
       std::string name = (initialDecisions.at(i)).first;
       bool resultInit = (initialDecisions.at(i)).second;
@@ -236,11 +250,15 @@ namespace l1t {
       double prescale = (prescales.at(i)).second;
       std::vector<int> mask = (masks.at(i)).second;
 
-      if (m_dumpTriggerResults && name != "NULL")
+      //std::cout << "#EF Before m_dumpTriggerResults! " << endl; //OK
+      if (m_dumpTriggerResults && name != "NULL"){
         cout << std::dec << setfill(' ') << "   " << setw(5) << i << "   " << setw(60) << name.c_str() << "   "
              << setw(7) << resultInit << setw(7) << resultInterm << setw(7) << resultFin << setw(10) << prescale
-             << setw(11) << mask.size() << endl;
+             << setw(11) << mask.size() << endl; 
+	std::cout << "#EF Entering m_dumpTriggerResults! " << endl; 
+      }
     }
+
     bool finOR = m_gtUtil->getFinalOR();
     if (m_dumpTriggerResults) {
       cout << "                                                                                    FinalOR = " << finOR
@@ -368,9 +386,18 @@ namespace l1t {
 
         //Loop over Muons
         nObj = 0;
+	int nMu = 0;
+
         cout << " ------ Muons --------" << endl;
         if (muons.isValid()) {
           if (i >= muons->getFirstBX() && i <= muons->getLastBX()) {
+	    int nMu_BX = 0;
+	    std::cout << "-------------------------------------------------------------------------------- EF: BX " << i << std::endl;	
+
+            std::vector<l1t::MuonShower>::const_iterator muShower = muons->at(i); // added by RICK
+	    //std::vector<l1t::MuonShower>::const_iterator muShower = muonShowers->begin(i); // added by RICK
+            std::cout << "##EF USE muShower OBJECT: isOneNominalInTime? " << muShower->isOneNominalInTime() << std::endl;
+
             for (std::vector<l1t::Muon>::const_iterator mu = muons->begin(i); mu != muons->end(i); ++mu) {
               cout << "  " << std::dec << std::setw(2) << std::setfill(' ') << nObj << std::setfill('0') << ")";
               cout << "   Pt " << std::dec << std::setw(3) << mu->hwPt() << " (0x" << std::hex << std::setw(3)
@@ -386,15 +413,27 @@ namespace l1t {
               cout << "   Iso " << std::dec << std::setw(1) << mu->hwIso();
               cout << "   Qual " << std::dec << std::setw(1) << mu->hwQual();
               cout << "   Chrg " << std::dec << std::setw(1) << mu->hwCharge();
-              cout << endl;
+              if(nObj == 0) cout << "   MUS0 "  << std::dec << std::setw(1) << muShower->isOneNominalInTime(); // added by RICK
+	      if(nObj == 2) cout << "   MUS1 "  << std::dec << std::setw(1) << muShower->isOneTightInTime(); // added by RICK
+	      if(nObj == 4) cout << "   MUSOOT0 " << std::dec << std::setw(1) << muShower->musOutOfTime0(); // added by RICK
+	      if(nObj == 6) cout << "   MUSOOT1 " << std::dec << std::setw(1) << muShower->musOutOfTime1(); // added by RICK
+	      cout << endl;
+
+	      nMu_BX++;
+	      ++muShower; // added by RICK
               nObj++;
             }
+          nMu++;
           } else {
             cout << "No Muons stored for this bx " << i << endl;
           }
         } else {
           cout << "No Muon Data in this event " << endl;
         }
+
+	std::cout << "@@@@@@@@@@@ EF: nMuons for this BX = " << nMu_BX << std::endl;
+	std::cout << "@@@@@@@@@@@ EF: nMuon in the Event " << nMu << std::endl;
+	std::cout << "--------------------------------------------------------------------------------" << std::endl;	
 
         //Loop over Taus
         nObj = 0;
@@ -566,7 +605,8 @@ namespace l1t {
         //	      (i>=etsums->getFirstBX()  && i<=etsums->getLastBX()) &&
         //	      (i>=uGtAlg->getFirstBX()  && i<=uGtAlg->getLastBX()) &&
         //	      (i>=uGtAlg->getFirstBX()  && i<=uGtAlg->getLastBX()) ) {
-        dumpTestVectors(i, m_testVectorFile, muons, egammas, taus, jets, etsums, uGtAlg, uGtExt);
+        //dumpTestVectors(i, m_testVectorFile, muons, egammas, taus, jets, etsums, uGtAlg, uGtExt); // ORIGINAL
+        dumpTestVectors(i, m_testVectorFile, muons, muonShowers, egammas, taus, jets, etsums, uGtAlg, uGtExt); //added by RICK
         //	 } else {
         //	      edm::LogWarning("GtRecordDump") << "WARNING: Not enough information to dump test vectors for this bx=" << i << endl;
         //	 }
@@ -600,6 +640,7 @@ namespace l1t {
   void GtRecordDump::dumpTestVectors(int bx,
                                      std::ofstream& myOutFile,
                                      Handle<BXVector<l1t::Muon>> muons,
+                                     Handle<BXVector<l1t::MuonShower>> muonShowers, //added by RICK
                                      Handle<BXVector<l1t::EGamma>> egammas,
                                      Handle<BXVector<l1t::Tau>> taus,
                                      Handle<BXVector<l1t::Jet>> jets,
@@ -612,16 +653,39 @@ namespace l1t {
     myOutFile << std::dec << std::setw(4) << std::setfill('0') << m_absBx;
 
     // Dump 8 Muons (16 digits + space)
+    /* Note that to include also the muon shower information in the muon word we need to consider that:
+       - MUS0: bit 61 in muon object 0
+       - MUS1: bit 61 in muon object 2
+       - MUSOOT0: bit 61 in muon object 4
+       - MUSOOT1: bit 61 in muon object 6
+    */
     int nDumped = 0;
+    int muNumber = 0;
+
     if (muons.isValid()) {
       for (std::vector<l1t::Muon>::const_iterator mu = muons->begin(bx); mu != muons->end(bx); ++mu) {
-        cms_uint64_t packedWd = formatMuon(mu);
-        if (nDumped < 8) {
+	//for (int i = 0; i < 8; ++i) {
+	//std::vector<l1t::Muon> mu = muons->at(i);
+	int muShowerBit = 0;
+	/* //EF SIMPLIFIED VERSION for DEBUGGING
+	std::vector<l1t::MuonShower>::const_iterator muShower = muonShowers->begin(bx); //added by RICK
+	std::cout << "#EF muNumber == " << muNumber << " and muShowerBit pre for = " << muShowerBit << std::endl;
+	if(muNumber == 0) muShowerBit = muShower->isOneNominalInTime(); //added by RICK
+	if(muNumber == 2) muShowerBit = muShower->isOneTightInTime(); //added by RICK
+	if(muNumber == 4) muShowerBit = muShower->musOutOfTime0(); //added by RICK
+	if(muNumber == 6) muShowerBit = muShower->musOutOfTime1(); //added by RICK
+	*/
+	std::cout << "#EF muNumber == " << muNumber << " and muShowerBit post for = " << muShowerBit << std::endl;
+	++muNumber; //added by RICK
+        cms_uint64_t packedWd = formatMuon(mu, muShowerBit); // Changed by RICK
+	
+	if (nDumped < 8) {
           myOutFile << " " << std::hex << std::setw(16) << std::setfill('0') << packedWd;
           nDumped++;
-        }
+	}
       }
     }
+
     for (int i = nDumped; i < 8; i++) {
       myOutFile << " " << std::hex << std::setw(16) << std::setfill('0') << empty;
     }
@@ -846,8 +910,10 @@ namespace l1t {
     m_absBx++;
   }
 
-  cms_uint64_t GtRecordDump::formatMuon(std::vector<l1t::Muon>::const_iterator mu) {
+  cms_uint64_t GtRecordDump::formatMuon(std::vector<l1t::Muon>::const_iterator mu, int muShowerBit) { //changed by RICK
     cms_uint64_t packedVal = 0;
+
+    std::cout << "**************EF = " << muShowerBit << std::endl;
 
     // Pack Bits
     packedVal |= ((cms_uint64_t)(mu->hwPhi() & 0x3ff) << 43);
@@ -855,40 +921,44 @@ namespace l1t {
     // packedVal |= ((cms_uint64_t)(mu->hwEta() & 0x1ff) << 53);         // removed
     packedVal |= ((cms_uint64_t)(mu->hwPtUnconstrained() & 0xff) << 53);  // added
     packedVal |= ((cms_uint64_t)(mu->hwDXY() & 0x3) << 62);               // added
+    packedVal |= ((cms_uint64_t)(muShowerBit & 0x1) << 61);               // added RICK; Question: where is the Muon Shower information and how to pass it into the GtRecordDump object?
     packedVal |= ((cms_uint64_t)(mu->hwEtaAtVtx() & 0x1ff) << 23);        // & 0x1ff) <<9);
     packedVal |= ((cms_uint64_t)(mu->hwPt() & 0x1ff) << 10);              // & 0x1ff) <<0);
     packedVal |= ((cms_uint64_t)(mu->hwChargeValid() & 0x1) << 35);       // & 0x1)   <<28);
     packedVal |= ((cms_uint64_t)(mu->hwCharge() & 0x1) << 34);            // & 0x1)   <<29);
     packedVal |= ((cms_uint64_t)(mu->hwQual() & 0xf) << 19);              // & 0xf)   <<30);
     packedVal |= ((cms_uint64_t)(mu->hwIso() & 0x3) << 32);               // & 0x3)   <<34);
-    packedVal |= ((cms_uint64_t)(mu->tfMuonIndex() & 0x7f) << 36);
 
-    //    if (false) {  // for debugging purposes
-    //      std::cout << "----------------------" << std::endl;
-    //      std::cout << "<<  0; mu->hwPhiAtVtx()        = " << std::hex << std::setw(16) << std::setfill('0')
-    //                << ((cms_uint64_t)(mu->hwPhiAtVtx() & 0x3ff) << 0) << std::endl;
-    //      std::cout << "<< 10; mu->hwPt()              = " << std::hex << std::setw(16) << std::setfill('0')
-    //                << ((cms_uint64_t)(mu->hwPt() & 0x1ff) << 10) << std::endl;
-    //      std::cout << "<< 19; mu->hwQual()            = " << std::hex << std::setw(16) << std::setfill('0')
-    //                << ((cms_uint64_t)(mu->hwQual() & 0xf) << 19) << std::endl;
-    //      std::cout << "<< 23; mu->hwEtaAtVtx()        = " << std::hex << std::setw(16) << std::setfill('0')
-    //                << ((cms_uint64_t)(mu->hwEtaAtVtx() & 0x1ff) << 23) << std::endl;
-    //      std::cout << "<< 32; mu->hwIso()             = " << std::hex << std::setw(16) << std::setfill('0')
-    //                << ((cms_uint64_t)(mu->hwIso() & 0x3) << 32) << std::endl;
-    //      std::cout << "<< 34; mu->hwCharge()          = " << std::hex << std::setw(16) << std::setfill('0')
-    //                << ((cms_uint64_t)(mu->hwCharge() & 0x1) << 34) << std::endl;
-    //      std::cout << "<< 35; mu->hwChargeValid()     = " << std::hex << std::setw(16) << std::setfill('0')
-    //                << ((cms_uint64_t)(mu->hwChargeValid() & 0x1) << 35) << std::endl;
-    //      std::cout << "<< 43; mu->hwPhi()             = " << std::hex << std::setw(16) << std::setfill('0')
-    //                << ((cms_uint64_t)(mu->hwPhi() & 0x3ff) << 43) << std::endl;
-    //      std::cout << "<< 53; mu->hwPtUnconstrained() = " << std::hex << std::setw(16) << std::setfill('0')
-    //                << ((cms_uint64_t)(mu->hwPtUnconstrained() & 0xff) << 53) << std::endl;
-    //      std::cout << "<< 62; mu->hwDXY()             = " << std::hex << std::setw(16) << std::setfill('0')
-    //                << ((cms_uint64_t)(mu->hwDXY() & 0x3) << 62) << std::endl;
-    //      std::cout << "packedWord                     = " << std::hex << std::setw(16) << std::setfill('0') << packedVal
-    //                << std::endl;
-    //      std::cout << "----------------------" << std::endl;
-    //    }
+        if (true) {  // for debugging purposes
+          std::cout << "----------------------" << std::endl;
+          std::cout << "<<  0; mu->hwPhiAtVtx()        = " << std::hex << std::setw(16) << std::setfill('0')
+                    << ((cms_uint64_t)(mu->hwPhiAtVtx() & 0x3ff) << 0) << std::endl;
+          std::cout << "<< 10; mu->hwPt()              = " << std::hex << std::setw(16) << std::setfill('0')
+                    << ((cms_uint64_t)(mu->hwPt() & 0x1ff) << 10) << std::endl;
+          std::cout << "<< 19; mu->hwQual()            = " << std::hex << std::setw(16) << std::setfill('0')
+                    << ((cms_uint64_t)(mu->hwQual() & 0xf) << 19) << std::endl;
+          std::cout << "<< 23; mu->hwEtaAtVtx()        = " << std::hex << std::setw(16) << std::setfill('0')
+                    << ((cms_uint64_t)(mu->hwEtaAtVtx() & 0x1ff) << 23) << std::endl;
+          std::cout << "<< 32; mu->hwIso()             = " << std::hex << std::setw(16) << std::setfill('0')
+                    << ((cms_uint64_t)(mu->hwIso() & 0x3) << 32) << std::endl;
+          std::cout << "<< 34; mu->hwCharge()          = " << std::hex << std::setw(16) << std::setfill('0')
+                    << ((cms_uint64_t)(mu->hwCharge() & 0x1) << 34) << std::endl;
+          std::cout << "<< 35; mu->hwChargeValid()     = " << std::hex << std::setw(16) << std::setfill('0')
+                    << ((cms_uint64_t)(mu->hwChargeValid() & 0x1) << 35) << std::endl;
+          std::cout << "<< 43; mu->hwPhi()             = " << std::hex << std::setw(16) << std::setfill('0')
+                    << ((cms_uint64_t)(mu->hwPhi() & 0x3ff) << 43) << std::endl;
+          std::cout << "<< 53; mu->hwPtUnconstrained() = " << std::hex << std::setw(16) << std::setfill('0')
+                    << ((cms_uint64_t)(mu->hwPtUnconstrained() & 0xff) << 53) << std::endl;
+	  std::cout << "<< 61: muShowerBit             = " << std::hex << std::setw(16) << std::setfill('0')
+		    << ((cms_uint64_t)(muShowerBit & 0x1) << 61) << std::endl;
+          std::cout << "<< 62; mu->hwDXY()             = " << std::hex << std::setw(16) << std::setfill('0')
+                    << ((cms_uint64_t)(mu->hwDXY() & 0x3) << 62) << std::endl;
+          std::cout << "packedWord                     = " << std::hex << std::setw(16) << std::setfill('0') << packedVal
+                    << std::endl;
+          std::cout << "----------------------" << std::endl;
+        }
+
+    cout << " ======= muShowerBit = " << muShowerBit << " ; packed word = "<< packedVal << endl;
 
     return packedVal;
   }
