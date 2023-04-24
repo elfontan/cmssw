@@ -388,17 +388,17 @@ namespace l1t {
         nObj = 0;
 	int nMu = 0;
 
-        cout << " ------ Muons --------" << endl;
         if (muons.isValid()) {
           if (i >= muons->getFirstBX() && i <= muons->getLastBX()) {
-	    int nMu_BX = 0;
 	    std::cout << "-------------------------------------------------------------------------------- EF: BX " << i << std::endl;	
 
-            std::vector<l1t::MuonShower>::const_iterator muShower = muons->at(i); // added by RICK
-	    //std::vector<l1t::MuonShower>::const_iterator muShower = muonShowers->begin(i); // added by RICK
-            std::cout << "##EF USE muShower OBJECT: isOneNominalInTime? " << muShower->isOneNominalInTime() << std::endl;
+	    std::vector<l1t::MuonShower>::const_iterator muShower = muonShowers->begin(i); // added by RICK
+	    //std::vector<l1t::MuonShower> muShower;
+	    std::cout << "##EF USE muShower OBJECT: isOneNominalInTime? " << muShower->isOneNominalInTime() << std::endl;
 
+	    int nMu_BX = 0;
             for (std::vector<l1t::Muon>::const_iterator mu = muons->begin(i); mu != muons->end(i); ++mu) {
+	      nMu_BX++;
               cout << "  " << std::dec << std::setw(2) << std::setfill(' ') << nObj << std::setfill('0') << ")";
               cout << "   Pt " << std::dec << std::setw(3) << mu->hwPt() << " (0x" << std::hex << std::setw(3)
                    << std::setfill('0') << mu->hwPt() << ")";
@@ -413,17 +413,19 @@ namespace l1t {
               cout << "   Iso " << std::dec << std::setw(1) << mu->hwIso();
               cout << "   Qual " << std::dec << std::setw(1) << mu->hwQual();
               cout << "   Chrg " << std::dec << std::setw(1) << mu->hwCharge();
-              if(nObj == 0) cout << "   MUS0 "  << std::dec << std::setw(1) << muShower->isOneNominalInTime(); // added by RICK
+              /* //EF SIMPLIFIED VERSION for DEBUGGING  
+	      if(nObj == 0) cout << "   MUS0 "  << std::dec << std::setw(1) << muShower->isOneNominalInTime(); // added by RICK
 	      if(nObj == 2) cout << "   MUS1 "  << std::dec << std::setw(1) << muShower->isOneTightInTime(); // added by RICK
 	      if(nObj == 4) cout << "   MUSOOT0 " << std::dec << std::setw(1) << muShower->musOutOfTime0(); // added by RICK
 	      if(nObj == 6) cout << "   MUSOOT1 " << std::dec << std::setw(1) << muShower->musOutOfTime1(); // added by RICK
+	      */
 	      cout << endl;
 
-	      nMu_BX++;
-	      ++muShower; // added by RICK
+	      //++muShower; // added by RICK
               nObj++;
             }
           nMu++;
+	  std::cout << "@@@@@@@@@@@ EF: nMuons for this BX = " << nMu_BX << std::endl;
           } else {
             cout << "No Muons stored for this bx " << i << endl;
           }
@@ -431,7 +433,6 @@ namespace l1t {
           cout << "No Muon Data in this event " << endl;
         }
 
-	std::cout << "@@@@@@@@@@@ EF: nMuons for this BX = " << nMu_BX << std::endl;
 	std::cout << "@@@@@@@@@@@ EF: nMuon in the Event " << nMu << std::endl;
 	std::cout << "--------------------------------------------------------------------------------" << std::endl;	
 
