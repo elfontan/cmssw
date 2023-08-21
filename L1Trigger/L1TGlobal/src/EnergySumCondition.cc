@@ -268,18 +268,38 @@ const bool l1t::EnergySumCondition::evaluateCondition(const int bxEval) const {
 
   if (type == l1t::EtSum::EtSumType::kCentrality) {
     bool myres = checkBit(candEt, centbit);
-    //std::cout << "CCLC:  Checking bit " << centbit << "\tResult is: " << myres << std::endl;
+    LogDebug("L1TGlobal") << "CCLC:  Checking bit " << centbit << "\tResult is: " << myres << std::endl;
     if (!myres) {
       LogDebug("L1TGlobal") << "\t\t l1t::EtSum failed Centrality bit" << std::endl;
       return false;
     }
   }
   else if (type == l1t::EtSum::EtSumType::kZDCP || type == l1t::EtSum::EtSumType::kZDCM) {
-    std::cout << "--------------------> ZDC ???????????????????" << std::endl;
-    bool myres = checkBit(candEt, centbit);
-    std::cout << "CCLC:  Checking bit " << centbit << "\tResult is: " << myres << std::endl;
-    
-  } else {
+    //l1t::EtSum candZDC = *(candVec->at(useBx, iEtSum));
+    unsigned int candZDCEsum = 200;
+    //unsigned int candZDCPEsum = 0;
+    //candZDCPEsum = candZDC.sumZDCPEt();
+    //unsigned int candZDCMEsum = 0;
+    //candZDCMEsum = candZDC.sumZDCMEt();
+    std::cout << "--------------------> EF src/EnergySumCondition.cc = EtSumType is ZDC!" 
+	      << "\n candZDCEsum = " << candZDCEsum
+      //<< "\n candZDCPEsum = " << candZDCPEsum
+      //	      << "\n candZDCMEsum = " << candZDCMEsum
+	      << "\n objPar.etLowThreshold = " << objPar.etLowThreshold
+	      << "\n  objPar.etHighThreshold = " << objPar.etHighThreshold
+	      << std::endl;
+
+    //if (candZDC.sumZDCPType == kZDCP){checkThreshold(objPar.etLowThreshold, objPar.etHighThreshold, candZDCPEsum, condGEqVal);}
+    //else if (candZDC.sumZDCMType == kZDCM){checkThreshold(objPar.etLowThreshold, objPar.etHighThreshold, candZDCMEsum, condGEqVal);}
+    //else{
+    bool myres = checkThreshold(objPar.etLowThreshold, objPar.etHighThreshold, candZDCEsum, condGEqVal);
+    if (!myres) {
+      std::cout << "\t\t l1t::EtSum failed ZDC checkThreshold" << std::endl;
+      return false;
+    }        
+    //}
+  } 
+  else {
     // check energy threshold
     if (!checkThreshold(objPar.etLowThreshold, objPar.etHighThreshold, candEt, condGEqVal)) {
       LogDebug("L1TGlobal") << "\t\t l1t::EtSum failed checkThreshold" << std::endl;
