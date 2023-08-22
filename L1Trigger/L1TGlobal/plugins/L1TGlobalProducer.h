@@ -126,10 +126,14 @@ private:
   edm::InputTag m_tauInputTag;
   edm::InputTag m_jetInputTag;
   edm::InputTag m_sumInputTag;
+  edm::InputTag m_zdcPlusEtSumInputTag;
+  edm::InputTag m_zdcMinusEtSumInputTag;
   edm::EDGetTokenT<BXVector<l1t::EGamma>> m_egInputToken;
   edm::EDGetTokenT<BXVector<l1t::Tau>> m_tauInputToken;
   edm::EDGetTokenT<BXVector<l1t::Jet>> m_jetInputToken;
   edm::EDGetTokenT<BXVector<l1t::EtSum>> m_sumInputToken;
+  edm::EDGetTokenT<BXVector<l1t::EtSum>> m_zdcPlusEtSumInputToken;
+  edm::EDGetTokenT<BXVector<l1t::EtSum>> m_zdcMinusEtSumInputToken;
 
   /// input tag for external conditions
   edm::InputTag m_extInputTag;

@@ -33,6 +33,7 @@
 #include "L1Trigger/L1TGlobal/interface/MuonShowerTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/CaloTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/EnergySumTemplate.h"
+#include "L1Trigger/L1TGlobal/interface/ZdcEnergySumTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/ExternalTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/CorrelationTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/CorrelationThreeBodyTemplate.h"
@@ -48,6 +49,7 @@
 #include "L1Trigger/L1TGlobal/interface/MuonShowerCondition.h"
 #include "L1Trigger/L1TGlobal/interface/CaloCondition.h"
 #include "L1Trigger/L1TGlobal/interface/EnergySumCondition.h"
+#include "L1Trigger/L1TGlobal/interface/ZdcEnergySumCondition.h"
 #include "L1Trigger/L1TGlobal/interface/ExternalCondition.h"
 #include "L1Trigger/L1TGlobal/interface/CorrCondition.h"
 #include "L1Trigger/L1TGlobal/interface/CorrThreeBodyCondition.h"
@@ -64,6 +66,8 @@ l1t::GlobalBoard::GlobalBoard()
       m_candL1Tau(new BXVector<const l1t::L1Candidate*>),
       m_candL1Jet(new BXVector<const l1t::L1Candidate*>),
       m_candL1EtSum(new BXVector<const l1t::EtSum*>),
+      m_candL1ZdcPlusEtSum(new BXVector<const l1t::EtSum*>),
+      m_candL1ZdcMinusEtSum(new BXVector<const l1t::EtSum*>),
       m_candL1External(new BXVector<const GlobalExtBlk*>),
       m_currentLumi(0),
       m_isDebugEnabled(edm::isDebugEnabled()) {
@@ -96,6 +100,8 @@ l1t::GlobalBoard::~GlobalBoard() {
   delete m_candL1Tau;
   delete m_candL1Jet;
   delete m_candL1EtSum;
+  delete m_candL1ZdcPlusEtSum;
+  delete m_candL1ZdcMinusEtSum;
   delete m_candL1External;
 }
 
@@ -121,6 +127,8 @@ void l1t::GlobalBoard::init(const int numberPhysTriggers,
   m_candL1Tau->setBXRange(m_bxFirst_, m_bxLast_);
   m_candL1Jet->setBXRange(m_bxFirst_, m_bxLast_);
   m_candL1EtSum->setBXRange(m_bxFirst_, m_bxLast_);
+  m_candL1ZdcPlusEtSum->setBXRange(m_bxFirst_, m_bxLast_);
+  m_candL1ZdcMinusEtSum->setBXRange(m_bxFirst_, m_bxLast_);
   m_candL1External->setBXRange(m_bxFirst_, m_bxLast_);
 
   m_uGtAlgBlk.reset();
@@ -134,13 +142,17 @@ void l1t::GlobalBoard::receiveCaloObjectData(const edm::Event& iEvent,
                                              const edm::EDGetTokenT<BXVector<l1t::Tau>>& tauInputToken,
                                              const edm::EDGetTokenT<BXVector<l1t::Jet>>& jetInputToken,
                                              const edm::EDGetTokenT<BXVector<l1t::EtSum>>& sumInputToken,
+                                             const edm::EDGetTokenT<BXVector<l1t::EtSum>>& zdcPlusEtSumInputToken,
+                                             const edm::EDGetTokenT<BXVector<l1t::EtSum>>& zdcMinusEtSumInputToken,
                                              const bool receiveEG,
                                              const int nrL1EG,
                                              const bool receiveTau,
                                              const int nrL1Tau,
                                              const bool receiveJet,
                                              const int nrL1Jet,
-                                             const bool receiveEtSums) {
+                                             const bool receiveEtSums,
+                                             const bool receiveZdcPlusEtSums,
+					     const bool receiveZdcMinusEtSums) {
   if (m_verbosity) {
     LogDebug("L1TGlobal") << "\n**** Board receiving Calo Data ";
     //<<  "\n     from input tag " << caloInputTag << "\n"
@@ -310,6 +322,53 @@ void l1t::GlobalBoard::receiveCaloObjectData(const edm::Event& iEvent,
 		  }
 */
 
+        }  //end loop over jet in bx
+      }    //end loop over Bx
+    }
+  }
+
+  if (receiveZdcPlusEtSums) {
+    edm::Handle<BXVector<l1t::EtSum>> etSumData;
+    iEvent.getByToken(zdcPlusEtSumInputToken, etSumData);
+
+    if (!etSumData.isValid()) {
+      if (m_verbosity) {
+        edm::LogWarning("L1TGlobal") << "\nWarning: BXVector<l1t::etSum> with input tag "
+                                     //<< caloInputTag
+                                     << "\nrequested in configuration, but not found in the event.\n";
+      }
+    } else {
+      for (int i = etSumData->getFirstBX(); i <= etSumData->getLastBX(); ++i) {
+        // Prevent from pushing back bx that is outside of allowed range
+        if (i < m_bxFirst_ || i > m_bxLast_)
+          continue;
+
+        //Loop over jet in this bx
+        for (std::vector<l1t::EtSum>::const_iterator etsum = etSumData->begin(i); etsum != etSumData->end(i); ++etsum) {
+          (*m_candL1ZdcPlusEtSum).push_back(i, &(*etsum));
+        }  //end loop over jet in bx
+      }    //end loop over Bx
+    }
+  }
+  if (receiveZdcMinusEtSums) {
+    edm::Handle<BXVector<l1t::EtSum>> etSumData;
+    iEvent.getByToken(zdcMinusEtSumInputToken, etSumData);
+
+    if (!etSumData.isValid()) {
+      if (m_verbosity) {
+        edm::LogWarning("L1TGlobal") << "\nWarning: BXVector<l1t::etSum> with input tag "
+                                     //<< caloInputTag
+                                     << "\nrequested in configuration, but not found in the event.\n";
+      }
+    } else {
+      for (int i = etSumData->getFirstBX(); i <= etSumData->getLastBX(); ++i) {
+        // Prevent from pushing back bx that is outside of allowed range
+        if (i < m_bxFirst_ || i > m_bxLast_)
+          continue;
+
+        //Loop over jet in this bx
+        for (std::vector<l1t::EtSum>::const_iterator etsum = etSumData->begin(i); etsum != etSumData->end(i); ++etsum) {
+          (*m_candL1ZdcMinusEtSum).push_back(i, &(*etsum));
         }  //end loop over jet in bx
       }    //end loop over Bx
     }
@@ -596,9 +655,17 @@ void l1t::GlobalBoard::runGTL(const edm::Event&,
 
           cMapResults[itCond->first] = eSumCondition;
 
+          ZdcEnergySumCondition* ZDCeSumCondition = new ZdcEnergySumCondition(itCond->second, this);
+
+          ZDCeSumCondition->setVerbosity(m_verbosity);
+          ZDCeSumCondition->evaluateConditionStoreResult(iBxInEvent);
+
+          cMapResults[itCond->first] = ZDCeSumCondition;
+
           if (m_verbosity && m_isDebugEnabled) {
             std::ostringstream myCout;
             eSumCondition->print(myCout);
+            ZDCeSumCondition->print(myCout);
 
             LogTrace("L1TGlobal") << myCout.str();
           }
@@ -1119,11 +1186,15 @@ void l1t::GlobalBoard::resetCalo() {
   m_candL1Tau->clear();
   m_candL1Jet->clear();
   m_candL1EtSum->clear();
+  m_candL1ZdcPlusEtSum->clear();
+  m_candL1ZdcMinusEtSum->clear();
 
   m_candL1EG->setBXRange(m_bxFirst_, m_bxLast_);
   m_candL1Tau->setBXRange(m_bxFirst_, m_bxLast_);
   m_candL1Jet->setBXRange(m_bxFirst_, m_bxLast_);
   m_candL1EtSum->setBXRange(m_bxFirst_, m_bxLast_);
+  m_candL1ZdcPlusEtSum->setBXRange(m_bxFirst_, m_bxLast_);
+  m_candL1ZdcMinusEtSum->setBXRange(m_bxFirst_, m_bxLast_);
 }
 
 void l1t::GlobalBoard::resetExternal() {

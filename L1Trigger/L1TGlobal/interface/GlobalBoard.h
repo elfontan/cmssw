@@ -68,13 +68,17 @@ namespace l1t {
                                const edm::EDGetTokenT<BXVector<l1t::Tau>>&,
                                const edm::EDGetTokenT<BXVector<l1t::Jet>>&,
                                const edm::EDGetTokenT<BXVector<l1t::EtSum>>&,
+                               const edm::EDGetTokenT<BXVector<l1t::EtSum>>&,
+                               const edm::EDGetTokenT<BXVector<l1t::EtSum>>&,
                                const bool receiveEG,
                                const int nrL1EG,
                                const bool receiveTau,
                                const int nrL1Tau,
                                const bool receiveJet,
                                const int nrL1Jet,
-                               const bool receiveEtSums);
+                               const bool receiveEtSums,
+                               const bool receiveZdcPlusEtSums,
+                               const bool receiveZdcMinusEtSums);
 
     void receiveMuonObjectData(const edm::Event&,
                                const edm::EDGetTokenT<BXVector<l1t::Muon>>&,
@@ -161,10 +165,14 @@ namespace l1t {
     /// pointer to Tau data list
     inline const BXVector<const l1t::L1Candidate*>* getCandL1Tau() const { return m_candL1Tau; }
 
-    /// pointer to Tau data list
+    /// pointer to EtSum data list
     inline const BXVector<const l1t::EtSum*>* getCandL1EtSum() const { return m_candL1EtSum; }
 
-    /// pointer to Tau data list
+    /// pointer to EtSum data list
+    inline const BXVector<const l1t::EtSum*>* getCandL1ZdcPlusEtSum() const { return m_candL1ZdcPlusEtSum; }
+    inline const BXVector<const l1t::EtSum*>* getCandL1ZdcMinusEtSum() const { return m_candL1ZdcMinusEtSum; }
+
+    /// pointer to External data list
     inline const BXVector<const GlobalExtBlk*>* getCandL1External() const { return m_candL1External; }
 
     /*  Drop individual EtSums for Now
@@ -226,6 +234,8 @@ namespace l1t {
     BXVector<const l1t::L1Candidate*>* m_candL1Tau;
     BXVector<const l1t::L1Candidate*>* m_candL1Jet;
     BXVector<const l1t::EtSum*>* m_candL1EtSum;
+    BXVector<const l1t::EtSum*>* m_candL1ZdcPlusEtSum;
+    BXVector<const l1t::EtSum*>* m_candL1ZdcMinusEtSum;
     BXVector<const GlobalExtBlk*>* m_candL1External;
 
     //    BXVector<const l1t::EtSum*>* m_candETM;
