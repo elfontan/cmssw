@@ -2408,8 +2408,7 @@ bool l1t::TriggerMenuParser::parseZdcEnergySum(L1TUtmCondition condEnergySum, un
   std::string type = l1t2string(condEnergySum.getType());
   std::string name = l1t2string(condEnergySum.getName());
 
-  std::cout << "\n ****************************************** "
-  //LogDebug("TriggerMenuParser") << "\n ****************************************** "
+  LogDebug("TriggerMenuParser") << "\n ****************************************** "
                                 << "\n      (in parseZdcEnergySum) "
                                 << "\n condition = " << condition << "\n type      = " << type
                                 << "\n name      = " << name << std::endl;
@@ -2419,11 +2418,11 @@ bool l1t::TriggerMenuParser::parseZdcEnergySum(L1TUtmCondition condEnergySum, un
   GtConditionType cType;
 
   if (condEnergySum.getType() == esConditionType::ZDCPlus) {
-    std::cout << "EF ZDC: esConditionType::ZDCPlus " << std::endl;
+    LogDebug("TriggerMenuParser") << "ZDC signals: esConditionType::ZDCPlus " << std::endl;
     energySumObjType = GlobalObject::gtZDCP;
     cType = TypeZDCP;
   } else if (condEnergySum.getType() == esConditionType::ZDCMinus) {
-    std::cout << "EF ZDC: esConditionType::ZDCMinus " << std::endl;
+    LogDebug("TriggerMenuParser") << "ZDC signals: esConditionType::ZDCMinus " << std::endl;
     energySumObjType = GlobalObject::gtZDCM; 
     cType = TypeZDCM;
   } else {
@@ -2485,8 +2484,7 @@ bool l1t::TriggerMenuParser::parseZdcEnergySum(L1TUtmCondition condEnergySum, un
     objParameter[cnt].etHighThreshold = upperThresholdInd;
 
     // Output for debugging
-    std::cout << "EF ZDC: TriggerMenuParser" << "\n ****************************************** "
-    //LogDebug("TriggerMenuParser") << "\n      ZdcEnergySum ET high threshold (hex) for energy sum object " << cnt << " = "
+    LogDebug("TriggerMenuParser") << "\n      ZdcEnergySum ET high threshold (hex) for energy sum object " << cnt << " = "
                                   << std::hex << objParameter[cnt].etLowThreshold << " - "
                                   << objParameter[cnt].etHighThreshold
                                   << std::dec << std::endl;
