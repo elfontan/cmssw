@@ -103,22 +103,20 @@ const bool l1t::ZdcEnergySumCondition::evaluateCondition(const int bxEval) const
   // clear the indices in the combination
   objectsInComb.clear();
 
-  const BXVector<const l1t::EtSum*>* candVecZdcPlus = m_uGtB->getCandL1ZdcPlusEtSum();
-  const BXVector<const l1t::EtSum*>* candVecZdcMinus = m_uGtB->getCandL1ZdcMinusEtSum();
+  const BXVector<const l1t::EtSum*>* candVecZdc = m_uGtB->getCandL1ZdcEtSum();
 
   // Look at objects in bx = bx + relativeBx
   int useBx = bxEval + m_gtZdcEnergySumTemplate->condRelativeBx();
 
   // Fail condition if attempting to get Bx outside of range
-  if ((useBx < candVecZdcPlus->getFirstBX()) || (useBx > candVecZdcPlus->getLastBX())) {
+  if ((useBx < candVecZdc->getFirstBX()) || (useBx > candVecZdc->getLastBX())) {
     return false;
   }
 
   // If no candidates, no use looking any further.
-  int numberObjectsZdcPlus = candVecZdcPlus->size(useBx);
-  int numberObjectsZdcMinus = candVecZdcMinus->size(useBx);
+  int numberObjectsZdc = candVecZdc->size(useBx);
 
-  if (numberObjectsZdcPlus < 1 && numberObjectsZdcMinus < 1) {return false;}
+  if (numberObjectsZdc < 1 && numberObjectsZdc < 1) {return false;}
   
   l1t::EtSum::EtSumType type;
   //bool MissingEnergy = false;
@@ -244,11 +242,8 @@ const bool l1t::ZdcEnergySumCondition::evaluateCondition(const int bxEval) const
 
   l1t::EtSum candZdcPlus;
   l1t::EtSum candZdcMinus;
-  for (int iEtSum = 0; iEtSum < numberObjectsZdcPlus; ++iEtSum) {
-    l1t::EtSum candZdcPlus = *(candVecZdcPlus->at(useBx, iEtSum));
-  }
-  for (int iEtSum = 0; iEtSum < numberObjectsZdcMinus; ++iEtSum) {
-    l1t::EtSum candZdcMinus = *(candVecZdcMinus->at(useBx, iEtSum));
+  for (int iEtSum = 0; iEtSum < numberObjectsZdc; ++iEtSum) {
+    l1t::EtSum candZdc = *(candVecZdc->at(useBx, iEtSum));
   }
   const ZdcEnergySumTemplate::ObjectParameter objPar = (*(m_gtZdcEnergySumTemplate->objectParameter()))[iCondition];
   
@@ -258,7 +253,7 @@ const bool l1t::ZdcEnergySumCondition::evaluateCondition(const int bxEval) const
   unsigned int candPhi = 0;
   bool candOverflow = false;
   for (int iEtSum = 0; iEtSum < numberObjects; ++iEtSum) {
-    l1t::EtSum cand = *(candVecZdcPlus->at(useBx, iEtSum));
+    l1t::EtSum cand = *(candVec->at(useBx, iEtSum));
     if (cand.getType() != type)
       continue;
     candEt = cand.hwPt();

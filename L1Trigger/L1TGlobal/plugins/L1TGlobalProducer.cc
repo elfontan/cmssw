@@ -49,10 +49,8 @@ void L1TGlobalProducer::fillDescriptions(edm::ConfigurationDescriptions& descrip
       ->setComment("InputTag for Calo Trigger Jet (required parameter:  default value is invalid)");
   desc.add<edm::InputTag>("EtSumInputTag", edm::InputTag(""))
       ->setComment("InputTag for Calo Trigger EtSum (required parameter:  default value is invalid)");
-  desc.add<edm::InputTag>("ZdcPlusEtSumInputTag", edm::InputTag(""))
-      ->setComment("InputTag for ZDC Plus EtSum (required parameter:  default value is invalid)");
-  desc.add<edm::InputTag>("ZdcMinusEtSumInputTag", edm::InputTag(""))
-      ->setComment("InputTag for ZDC Minus EtSum (required parameter:  default value is invalid)");
+  desc.add<edm::InputTag>("ZdcEtSumInputTag", edm::InputTag(""))
+      ->setComment("InputTag for ZDC EtSums Plus and Minus (required parameter:  default value is invalid)");
   desc.add<edm::InputTag>("ExtInputTag", edm::InputTag(""))
       ->setComment("InputTag for external conditions (not required, but recommend to specify explicitly in config)");
   desc.add<edm::InputTag>("AlgoBlkInputTag", edm::InputTag("hltGtStage2Digis"))
@@ -107,8 +105,7 @@ L1TGlobalProducer::L1TGlobalProducer(const edm::ParameterSet& parSet)
       m_tauInputTag(parSet.getParameter<edm::InputTag>("TauInputTag")),
       m_jetInputTag(parSet.getParameter<edm::InputTag>("JetInputTag")),
       m_sumInputTag(parSet.getParameter<edm::InputTag>("EtSumInputTag")),
-      m_zdcPlusEtSumInputTag(parSet.getParameter<edm::InputTag>("ZdcPlusEtSumInputTag")),
-      m_zdcMinusEtSumInputTag(parSet.getParameter<edm::InputTag>("ZdcMinusEtSumInputTag")),
+      m_zdcEtSumInputTag(parSet.getParameter<edm::InputTag>("ZdcEtSumInputTag")),
       m_extInputTag(parSet.getParameter<edm::InputTag>("ExtInputTag")),
 
       m_produceL1GtDaqRecord(parSet.getParameter<bool>("ProduceL1GtDaqRecord")),
@@ -138,8 +135,7 @@ L1TGlobalProducer::L1TGlobalProducer(const edm::ParameterSet& parSet)
   m_tauInputToken = consumes<BXVector<Tau>>(m_tauInputTag);
   m_jetInputToken = consumes<BXVector<Jet>>(m_jetInputTag);
   m_sumInputToken = consumes<BXVector<EtSum>>(m_sumInputTag);
-  m_zdcPlusEtSumInputToken = consumes<BXVector<EtSum>>(m_zdcPlusEtSumInputTag);
-  m_zdcMinusEtSumInputToken = consumes<BXVector<EtSum>>(m_zdcMinusEtSumInputTag);
+  m_zdcEtSumInputToken = consumes<BXVector<EtSum>>(m_zdcEtSumInputTag);
   m_muInputToken = consumes<BXVector<Muon>>(m_muInputTag);
   if (m_useMuonShowers)
     m_muShowerInputToken = consumes<BXVector<MuonShower>>(m_muShowerInputTag);
@@ -522,8 +518,7 @@ void L1TGlobalProducer::produce(edm::Event& iEvent, const edm::EventSetup& evSet
   bool receiveTau = true;
   bool receiveJet = true;
   bool receiveEtSums = true;
-  bool receiveZdcPlusEtSums = true;
-  bool receiveZdcMinusEtSums = true;
+  bool receiveZdcEtSums = true;
   bool receiveExt = true;
 
   /*  *** Boards need redefining *****
@@ -613,8 +608,7 @@ void L1TGlobalProducer::produce(edm::Event& iEvent, const edm::EventSetup& evSet
                                   m_tauInputToken,
                                   m_jetInputToken,
                                   m_sumInputToken,
-                                  m_sumInputToken,
-                                  m_sumInputToken,
+                                  m_zdcEtSumInputToken,
                                   receiveEG,
                                   m_nrL1EG,
                                   receiveTau,
@@ -622,9 +616,8 @@ void L1TGlobalProducer::produce(edm::Event& iEvent, const edm::EventSetup& evSet
                                   receiveJet,
                                   m_nrL1Jet,
                                   receiveEtSums,
-                                  receiveZdcPlusEtSums,
-                                  receiveZdcMinusEtSums);
-  // EF NOTE: Check if I can move m_sumInputToken to m_zdcInputToken
+                                  receiveZdcEtSums);
+
   m_uGtBrd->receiveMuonObjectData(iEvent, m_muInputToken, receiveMu, m_nrL1Mu);
 
   if (m_useMuonShowers)

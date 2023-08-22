@@ -260,13 +260,12 @@ const bool l1t::EnergySumCondition::evaluateCondition(const int bxEval) const {
 
   if (type == l1t::EtSum::EtSumType::kCentrality) {
     bool myres = checkBit(candEt, centbit);
-    LogDebug("L1TGlobal") << "CCLC:  Checking bit " << centbit << "\tResult is: " << myres << std::endl;
+    //std::cout << "CCLC:  Checking bit " << centbit << "\tResult is: " << myres << std::endl;
     if (!myres) {
       LogDebug("L1TGlobal") << "\t\t l1t::EtSum failed Centrality bit" << std::endl;
       return false;
     }
-  }
-  else {
+  } else {
     // check energy threshold
     if (!checkThreshold(objPar.etLowThreshold, objPar.etHighThreshold, candEt, condGEqVal)) {
       LogDebug("L1TGlobal") << "\t\t l1t::EtSum failed checkThreshold" << std::endl;

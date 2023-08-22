@@ -661,9 +661,6 @@ void l1t::GlobalScales::print(std::ostream& myCout) const {
   myCout << "   HTM Scales: " << std::endl;
   printScale(m_htmScales, myCout);
 
-  myCout << "   ZDC Scales: " << std::endl;
-  printScale(m_zdcScales, myCout);
-
   myCout << "   ETM Scales: " << std::endl;
   printScale(m_etmScales, myCout);
 

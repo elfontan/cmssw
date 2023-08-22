@@ -67,7 +67,6 @@ namespace l1t {
     inline void setETMScales(ScaleParameters& scales) { m_etmScales = scales; }
     inline void setETMHfScales(ScaleParameters& scales) { m_etmHfScales = scales; }
     inline void setHTMScales(ScaleParameters& scales) { m_htmScales = scales; }
-    inline void setZDCScales(ScaleParameters& scales) { m_zdcScales = scales; }
 
     virtual void setLUT_CalMuEta(const std::string& lutName, std::vector<long long> lut);
     virtual void setLUT_CalMuPhi(const std::string& lutName, std::vector<long long> lut);
@@ -94,7 +93,6 @@ namespace l1t {
     inline const ScaleParameters& getETMHFScales() const { return m_etmHfScales; }
     inline const ScaleParameters& getHTTScales() const { return m_httScales; }
     inline const ScaleParameters& getHTMScales() const { return m_htmScales; }
-    inline const ScaleParameters& getZDCScales() const { return m_zdcScales; }
 
     long long getLUT_CalMuEta(const std::string& lutName, int element) const;
     long long getLUT_CalMuPhi(const std::string& lutName, int element) const;
@@ -137,7 +135,6 @@ namespace l1t {
     ScaleParameters m_etmScales;
     ScaleParameters m_etmHfScales;
     ScaleParameters m_htmScales;
-    ScaleParameters m_zdcScales;
 
     //LUTs
     std::map<std::string, std::vector<long long>> m_lut_CalMuEta;
