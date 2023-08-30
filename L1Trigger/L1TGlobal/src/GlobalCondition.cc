@@ -200,9 +200,9 @@ void GlobalCondition::print(std::ostream& myCout) const {
     }
 
     break;
-    case l1t::CondZdcEnergySum: {
+    case l1t::CondEnergySumZdc: {
       myCout << "  Condition category: "
-             << "CondZdcEnergySum" << std::endl;
+             << "CondEnergySumZdc" << std::endl;
     }
 
     break;

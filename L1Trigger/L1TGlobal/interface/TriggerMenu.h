@@ -35,7 +35,7 @@
 #include "L1Trigger/L1TGlobal/interface/MuonShowerTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/CaloTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/EnergySumTemplate.h"
-#include "L1Trigger/L1TGlobal/interface/ZdcEnergySumTemplate.h"
+#include "L1Trigger/L1TGlobal/interface/EnergySumZdcTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/ExternalTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/CorrelationTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/CorrelationThreeBodyTemplate.h"
@@ -58,7 +58,7 @@ public:
               const std::vector<std::vector<MuonShowerTemplate> >&,
               const std::vector<std::vector<CaloTemplate> >&,
               const std::vector<std::vector<EnergySumTemplate> >&,
-              const std::vector<std::vector<ZdcEnergySumTemplate> >&,
+              const std::vector<std::vector<EnergySumZdcTemplate> >&,
               const std::vector<std::vector<ExternalTemplate> >&,
               const std::vector<std::vector<CorrelationTemplate> >&,
               const std::vector<std::vector<CorrelationThreeBodyTemplate> >&,
@@ -133,11 +133,11 @@ public:
   void setVecEnergySumTemplate(const std::vector<std::vector<EnergySumTemplate> >&);
 
   //
-  inline const std::vector<std::vector<ZdcEnergySumTemplate> >& vecZdcEnergySumTemplate() const {
-    return m_vecZdcEnergySumTemplate;
+  inline const std::vector<std::vector<EnergySumZdcTemplate> >& vecEnergySumZdcTemplate() const {
+    return m_vecEnergySumZdcTemplate;
   }
 
-  void setVecZdcEnergySumTemplate(const std::vector<std::vector<ZdcEnergySumTemplate> >&);
+  void setVecEnergySumZdcTemplate(const std::vector<std::vector<EnergySumZdcTemplate> >&);
 
   //
   inline const std::vector<std::vector<ExternalTemplate> >& vecExternalTemplate() const {
@@ -240,7 +240,7 @@ private:
   std::vector<std::vector<MuonShowerTemplate> > m_vecMuonShowerTemplate;
   std::vector<std::vector<CaloTemplate> > m_vecCaloTemplate;
   std::vector<std::vector<EnergySumTemplate> > m_vecEnergySumTemplate;
-  std::vector<std::vector<ZdcEnergySumTemplate> > m_vecZdcEnergySumTemplate;
+  std::vector<std::vector<EnergySumZdcTemplate> > m_vecEnergySumZdcTemplate;
 
   std::vector<std::vector<ExternalTemplate> > m_vecExternalTemplate;
 

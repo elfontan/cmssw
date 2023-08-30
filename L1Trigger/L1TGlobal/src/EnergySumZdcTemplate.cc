@@ -1,5 +1,5 @@
 /**
- * \class ZdcEnergySumTemplate
+ * \class EnergySumZdcTemplate
  *
  *
  * Description: L1 Global Trigger energy-sum template.
@@ -15,7 +15,7 @@
  */
 
 // this class header
-#include "L1Trigger/L1TGlobal/interface/ZdcEnergySumTemplate.h"
+#include "L1Trigger/L1TGlobal/interface/EnergySumZdcTemplate.h"
 
 // system include files
 
@@ -29,15 +29,15 @@
 // forward declarations
 
 // constructors
-ZdcEnergySumTemplate::ZdcEnergySumTemplate() : GlobalCondition() { m_condCategory = l1t::CondZdcEnergySum; }
+EnergySumZdcTemplate::EnergySumZdcTemplate() : GlobalCondition() { m_condCategory = l1t::CondEnergySumZdc; }
 
-ZdcEnergySumTemplate::ZdcEnergySumTemplate(const std::string& cName) : GlobalCondition(cName) {
-  m_condCategory = l1t::CondZdcEnergySum;
+EnergySumZdcTemplate::EnergySumZdcTemplate(const std::string& cName) : GlobalCondition(cName) {
+  m_condCategory = l1t::CondEnergySumZdc;
 }
 
-ZdcEnergySumTemplate::ZdcEnergySumTemplate(const std::string& cName, const l1t::GtConditionType& cType)
-    : GlobalCondition(cName, l1t::CondZdcEnergySum, cType) {
-  m_condCategory = l1t::CondZdcEnergySum;
+EnergySumZdcTemplate::EnergySumZdcTemplate(const std::string& cName, const l1t::GtConditionType& cType)
+    : GlobalCondition(cName, l1t::CondEnergySumZdc, cType) {
+  m_condCategory = l1t::CondEnergySumZdc;
 
   // should be always 1 - they are global quantities...
   int nObjects = nrObjects();
@@ -49,26 +49,26 @@ ZdcEnergySumTemplate::ZdcEnergySumTemplate(const std::string& cName, const l1t::
 }
 
 // copy constructor
-ZdcEnergySumTemplate::ZdcEnergySumTemplate(const ZdcEnergySumTemplate& cp) : GlobalCondition(cp.m_condName) {
+EnergySumZdcTemplate::EnergySumZdcTemplate(const EnergySumZdcTemplate& cp) : GlobalCondition(cp.m_condName) {
   copy(cp);
 }
 
 // destructor
-ZdcEnergySumTemplate::~ZdcEnergySumTemplate() = default;
+EnergySumZdcTemplate::~EnergySumZdcTemplate() = default;
 
 // assign operator
-ZdcEnergySumTemplate& ZdcEnergySumTemplate::operator=(const ZdcEnergySumTemplate& cp) {
+EnergySumZdcTemplate& EnergySumZdcTemplate::operator=(const EnergySumZdcTemplate& cp) {
   copy(cp);
   return *this;
 }
 
 // setConditionParameter - set the parameters of the condition
-void ZdcEnergySumTemplate::setConditionParameter(const std::vector<ObjectParameter>& objParameter) {
+void EnergySumZdcTemplate::setConditionParameter(const std::vector<ObjectParameter>& objParameter) {
   m_objectParameter = objParameter;
 }
 
-void ZdcEnergySumTemplate::print(std::ostream& myCout) const {
-  myCout << "\n  ZdcEnergySumTemplate print..." << std::endl;
+void EnergySumZdcTemplate::print(std::ostream& myCout) const {
+  myCout << "\n  EnergySumZdcTemplate print..." << std::endl;
 
   GlobalCondition::print(myCout);
 
@@ -85,7 +85,7 @@ void ZdcEnergySumTemplate::print(std::ostream& myCout) const {
   myCout << std::dec << std::endl;
 }
 
-void ZdcEnergySumTemplate::copy(const ZdcEnergySumTemplate& cp) {
+void EnergySumZdcTemplate::copy(const EnergySumZdcTemplate& cp) {
   m_condName = cp.condName();
   m_condCategory = cp.condCategory();
   m_condType = cp.condType();
@@ -98,7 +98,7 @@ void ZdcEnergySumTemplate::copy(const ZdcEnergySumTemplate& cp) {
 }
 
 // output stream operator
-std::ostream& operator<<(std::ostream& os, const ZdcEnergySumTemplate& result) {
+std::ostream& operator<<(std::ostream& os, const EnergySumZdcTemplate& result) {
   result.print(os);
   return os;
 }

@@ -1,11 +1,11 @@
-#ifndef L1Trigger_L1TGlobal_ZdcEnergySumCondition_h
-#define L1Trigger_L1TGlobal_ZdcEnergySumCondition_h
+#ifndef L1Trigger_L1TGlobal_EnergySumZdcCondition_h
+#define L1Trigger_L1TGlobal_EnergySumZdcCondition_h
 
 /**
- * \class ZdcEnergySumCondition
+ * \class EnergySumZdcCondition
  * 
  * 
- * Description: evaluation of a CondZdcEnergySum condition.
+ * Description: evaluation of a CondEnergySumZdc condition.
  * 
  * Implementation:
  *    <TODO: enter implementation details>
@@ -25,7 +25,7 @@
 
 // forward declarations
 class GlobalCondition;
-class ZdcEnergySumTemplate;
+class EnergySumZdcTemplate;
 
 namespace l1t {
 
@@ -34,23 +34,23 @@ namespace l1t {
   class GlobalBoard;
 
   // class declaration
-  class ZdcEnergySumCondition : public ConditionEvaluation {
+  class EnergySumZdcCondition : public ConditionEvaluation {
   public:
     /// constructors
     ///     default
-    ZdcEnergySumCondition();
+    EnergySumZdcCondition();
 
     ///     from base template condition (from event setup usually)
-    ZdcEnergySumCondition(const GlobalCondition*, const GlobalBoard*);
+    EnergySumZdcCondition(const GlobalCondition*, const GlobalBoard*);
 
     // copy constructor
-    ZdcEnergySumCondition(const ZdcEnergySumCondition&);
+    EnergySumZdcCondition(const EnergySumZdcCondition&);
 
     // destructor
-    ~ZdcEnergySumCondition() override;
+    ~EnergySumZdcCondition() override;
 
     // assign operator
-    ZdcEnergySumCondition& operator=(const ZdcEnergySumCondition&);
+    EnergySumZdcCondition& operator=(const EnergySumZdcCondition&);
 
   public:
     /// the core function to check if the condition matches
@@ -61,9 +61,9 @@ namespace l1t {
 
   public:
     ///   get / set the pointer to a L1GtCondition
-    inline const ZdcEnergySumTemplate* gtZdcEnergySumTemplate() const { return m_gtZdcEnergySumTemplate; }
+    inline const EnergySumZdcTemplate* gtEnergySumZdcTemplate() const { return m_gtEnergySumZdcTemplate; }
 
-    void setGtZdcEnergySumTemplate(const ZdcEnergySumTemplate*);
+    void setGtEnergySumZdcTemplate(const EnergySumZdcTemplate*);
 
     ///   get / set the pointer to uGt GlobalBoard
     inline const GlobalBoard* getuGtB() const { return m_uGtB; }
@@ -72,11 +72,11 @@ namespace l1t {
 
   private:
     /// copy function for copy constructor and operator=
-    void copy(const ZdcEnergySumCondition& cp);
+    void copy(const EnergySumZdcCondition& cp);
 
   private:
-    /// pointer to a ZdcEnergySumTemplate
-    const ZdcEnergySumTemplate* m_gtZdcEnergySumTemplate;
+    /// pointer to a EnergySumZdcTemplate
+    const EnergySumZdcTemplate* m_gtEnergySumZdcTemplate;
 
     /// pointer to uGt GlobalBoard, to be able to get the trigger objects
     const GlobalBoard* m_uGtB;

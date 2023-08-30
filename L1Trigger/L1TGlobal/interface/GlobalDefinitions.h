@@ -98,7 +98,7 @@ namespace l1t {
     CondMuon,
     CondCalo,
     CondEnergySum,
-    CondZdcEnergySum,
+    CondEnergySumZdc,
     CondCorrelation,
     CondExternal,
     CondCorrelationWithOverlapRemoval,

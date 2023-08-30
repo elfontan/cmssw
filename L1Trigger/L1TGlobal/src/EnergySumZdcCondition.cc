@@ -1,5 +1,5 @@
 /**
-\class ZdcEnergySumCondition
+\class EnergySumZdcCondition
  *
  *
  * Description: evaluation of a CondEnergySum condition for ZDC objects.
@@ -13,7 +13,7 @@
  */
 
 // this class header
-#include "L1Trigger/L1TGlobal/interface/ZdcEnergySumCondition.h"
+#include "L1Trigger/L1TGlobal/interface/EnergySumZdcCondition.h"
 
 // system include files
 #include <iostream>
@@ -25,7 +25,7 @@
 
 // user include files
 //   base classes
-#include "L1Trigger/L1TGlobal/interface/ZdcEnergySumTemplate.h"
+#include "L1Trigger/L1TGlobal/interface/EnergySumZdcTemplate.h"
 #include "L1Trigger/L1TGlobal/interface/ConditionEvaluation.h"
 #include "DataFormats/L1Trigger/interface/L1Candidate.h"
 #include "L1Trigger/L1TGlobal/interface/GlobalBoard.h"
@@ -35,14 +35,14 @@
 
 // constructors
 //     default
-l1t::ZdcEnergySumCondition::ZdcEnergySumCondition() : ConditionEvaluation() {
+l1t::EnergySumZdcCondition::EnergySumZdcCondition() : ConditionEvaluation() {
   //empty
 }
 
 //     from base template condition (from event setup usually)
-l1t::ZdcEnergySumCondition::ZdcEnergySumCondition(const GlobalCondition* eSumTemplate, const GlobalBoard* ptrGTB)
+l1t::EnergySumZdcCondition::EnergySumZdcCondition(const GlobalCondition* eSumTemplate, const GlobalBoard* ptrGTB)
     : ConditionEvaluation(),
-      m_gtZdcEnergySumTemplate(static_cast<const ZdcEnergySumTemplate*>(eSumTemplate)),
+      m_gtEnergySumZdcTemplate(static_cast<const EnergySumZdcTemplate*>(eSumTemplate)),
       m_uGtB(ptrGTB)
 
 {
@@ -53,8 +53,8 @@ l1t::ZdcEnergySumCondition::ZdcEnergySumCondition(const GlobalCondition* eSumTem
 }
 
 // copy constructor
-void l1t::ZdcEnergySumCondition::copy(const l1t::ZdcEnergySumCondition& cp) {
-  m_gtZdcEnergySumTemplate = cp.gtZdcEnergySumTemplate();
+void l1t::EnergySumZdcCondition::copy(const l1t::EnergySumZdcCondition& cp) {
+  m_gtEnergySumZdcTemplate = cp.gtEnergySumZdcTemplate();
   m_uGtB = cp.getuGtB();
 
   m_condMaxNumberObjects = cp.condMaxNumberObjects();
@@ -64,29 +64,29 @@ void l1t::ZdcEnergySumCondition::copy(const l1t::ZdcEnergySumCondition& cp) {
   m_verbosity = cp.m_verbosity;
 }
 
-l1t::ZdcEnergySumCondition::ZdcEnergySumCondition(const l1t::ZdcEnergySumCondition& cp) : ConditionEvaluation() {
+l1t::EnergySumZdcCondition::EnergySumZdcCondition(const l1t::EnergySumZdcCondition& cp) : ConditionEvaluation() {
   copy(cp);
 }
 
 // destructor
-l1t::ZdcEnergySumCondition::~ZdcEnergySumCondition() = default;
+l1t::EnergySumZdcCondition::~EnergySumZdcCondition() = default;
 
 // equal operator
-l1t::ZdcEnergySumCondition& l1t::ZdcEnergySumCondition::operator=(const l1t::ZdcEnergySumCondition& cp) {
+l1t::EnergySumZdcCondition& l1t::EnergySumZdcCondition::operator=(const l1t::EnergySumZdcCondition& cp) {
   copy(cp);
   return *this;
 }
 
 // methods
-void l1t::ZdcEnergySumCondition::setGtZdcEnergySumTemplate(const ZdcEnergySumTemplate* eSumTempl) {
-  m_gtZdcEnergySumTemplate = eSumTempl;
+void l1t::EnergySumZdcCondition::setGtEnergySumZdcTemplate(const EnergySumZdcTemplate* eSumTempl) {
+  m_gtEnergySumZdcTemplate = eSumTempl;
 }
 
 // set the pointer to uGT GlobalBoard
-void l1t::ZdcEnergySumCondition::setuGtB(const GlobalBoard* ptrGTB) { m_uGtB = ptrGTB; }
+void l1t::EnergySumZdcCondition::setuGtB(const GlobalBoard* ptrGTB) { m_uGtB = ptrGTB; }
 
 // try all object permutations and check spatial correlations, if required
-const bool l1t::ZdcEnergySumCondition::evaluateCondition(const int bxEval) const {
+const bool l1t::EnergySumZdcCondition::evaluateCondition(const int bxEval) const {
   // number of trigger objects in the condition: there is only one object
   int iCondition = 0;
 
@@ -104,10 +104,10 @@ const bool l1t::ZdcEnergySumCondition::evaluateCondition(const int bxEval) const
   // clear the indices in the combination
   objectsInComb.clear();
 
-  const BXVector<const l1t::EtSum*>* candVecZdc = m_uGtB->getCandL1ZdcEtSum();
+  const BXVector<const l1t::EtSum*>* candVecZdc = m_uGtB->getCandL1EtSumZdc();
 
   // Look at objects in bx = bx + relativeBx
-  int useBx = bxEval + m_gtZdcEnergySumTemplate->condRelativeBx();
+  int useBx = bxEval + m_gtEnergySumZdcTemplate->condRelativeBx();
 
   // Fail condition if attempting to get Bx outside of range
   if ((useBx < candVecZdc->getFirstBX()) || (useBx > candVecZdc->getLastBX())) {
@@ -121,8 +121,11 @@ const bool l1t::ZdcEnergySumCondition::evaluateCondition(const int bxEval) const
     return false;
   }
 
-  const ZdcEnergySumTemplate::ObjectParameter objPar = (*(m_gtZdcEnergySumTemplate->objectParameter()))[iCondition];
-  bool condGEqVal = m_gtZdcEnergySumTemplate->condGEq();
+  const EnergySumZdcTemplate::ObjectParameter objPar = (*(m_gtEnergySumZdcTemplate->objectParameter()))[iCondition];
+
+  // Definition in CondFormats/L1TObjects/interface/L1GtCondition.h: 
+  // condGEqVal indicates the operator used for the condition (>=, =): true for >=
+  bool condGEqVal = m_gtEnergySumZdcTemplate->condGEq();
 
   l1t::EtSum candZdcPlus;
   l1t::EtSum candZdcMinus;
@@ -152,14 +155,15 @@ const bool l1t::ZdcEnergySumCondition::evaluateCondition(const int bxEval) const
       return false;
     }
 
-    LogDebug("L1TGlobal") << "ZDC EtSumType object from ZdcEnergySumTemplate: "
-                          << "\n objPar.etLowThreshold = " << objPar.etLowThreshold
-                          << "\n objPar.etHighThreshold = " << objPar.etHighThreshold
-                          << "\n candZDCPEsum = " << candZDCPEsum << "\n candZDCMEsum = " << candZDCMEsum
-                          << "\n condGEqVal = " << condGEqVal << "\n myres = " << myres << std::endl;
+    LogDebug("L1TGlobal")
+        << "----------------------------------------------> ZDC EtSumType object from EnergySumZdcTemplate"
+        << "\n objPar.etLowThreshold = " << objPar.etLowThreshold
+        << "\n objPar.etHighThreshold = " << objPar.etHighThreshold << "\n candZDCPEsum = " << candZDCPEsum
+        << "\n candZDCMEsum = " << candZDCMEsum << "\n condGEqVal = " << condGEqVal << "\n myres = " << myres
+        << std::endl;
   }
 
-  if (!(myres && condGEqVal))
+  if (not myres)
     return false;
 
   // index is always zero, as they are global quantities (there is only one object)
@@ -170,12 +174,11 @@ const bool l1t::ZdcEnergySumCondition::evaluateCondition(const int bxEval) const
 
   // if we get here all checks were successful for this combination
   // set the general result for evaluateCondition to "true"
-
   condResult = true;
   return condResult;
 }
 
-void l1t::ZdcEnergySumCondition::print(std::ostream& myCout) const {
-  m_gtZdcEnergySumTemplate->print(myCout);
+void l1t::EnergySumZdcCondition::print(std::ostream& myCout) const {
+  m_gtEnergySumZdcTemplate->print(myCout);
   ConditionEvaluation::print(myCout);
 }

@@ -76,7 +76,7 @@ namespace l1t {
                                const bool receiveJet,
                                const int nrL1Jet,
                                const bool receiveEtSums,
-                               const bool receiveZdcEtSums);
+                               const bool receiveEtSumsZdc);
 
     void receiveMuonObjectData(const edm::Event&,
                                const edm::EDGetTokenT<BXVector<l1t::Muon>>&,
@@ -167,7 +167,7 @@ namespace l1t {
     inline const BXVector<const l1t::EtSum*>* getCandL1EtSum() const { return m_candL1EtSum; }
 
     /// pointer to ZDC EtSum data list
-    inline const BXVector<const l1t::EtSum*>* getCandL1ZdcEtSum() const { return m_candL1ZdcEtSum; }
+    inline const BXVector<const l1t::EtSum*>* getCandL1EtSumZdc() const { return m_candL1EtSumZdc; }
 
     /// pointer to External data list
     inline const BXVector<const GlobalExtBlk*>* getCandL1External() const { return m_candL1External; }
@@ -231,7 +231,7 @@ namespace l1t {
     BXVector<const l1t::L1Candidate*>* m_candL1Tau;
     BXVector<const l1t::L1Candidate*>* m_candL1Jet;
     BXVector<const l1t::EtSum*>* m_candL1EtSum;
-    BXVector<const l1t::EtSum*>* m_candL1ZdcEtSum;
+    BXVector<const l1t::EtSum*>* m_candL1EtSumZdc;
     BXVector<const GlobalExtBlk*>* m_candL1External;
 
     //    BXVector<const l1t::EtSum*>* m_candETM;

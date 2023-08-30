@@ -1,8 +1,8 @@
-#ifndef L1Trigger_L1TGlobal_ZdcEnergySumTemplate_h
-#define L1Trigger_L1TGlobal_ZdcEnergySumTemplate_h
+#ifndef L1Trigger_L1TGlobal_EnergySumZdcTemplate_h
+#define L1Trigger_L1TGlobal_EnergySumZdcTemplate_h
 
 /**
- * \class ZdcEnergySumTemplate
+ * \class EnergySumZdcTemplate
  *
  *
  * Description: L1 Global Trigger energy-sum template.
@@ -29,25 +29,25 @@
 // forward declarations
 
 // class declaration
-class ZdcEnergySumTemplate : public GlobalCondition {
+class EnergySumZdcTemplate : public GlobalCondition {
 public:
   // constructor
-  ZdcEnergySumTemplate();
+  EnergySumZdcTemplate();
 
   // constructor
-  ZdcEnergySumTemplate(const std::string&);
+  EnergySumZdcTemplate(const std::string&);
 
   // constructor
-  ZdcEnergySumTemplate(const std::string&, const l1t::GtConditionType&);
+  EnergySumZdcTemplate(const std::string&, const l1t::GtConditionType&);
 
   // copy constructor
-  ZdcEnergySumTemplate(const ZdcEnergySumTemplate&);
+  EnergySumZdcTemplate(const EnergySumZdcTemplate&);
 
   // destructor
-  ~ZdcEnergySumTemplate() override;
+  ~EnergySumZdcTemplate() override;
 
   // assign operator
-  ZdcEnergySumTemplate& operator=(const ZdcEnergySumTemplate&);
+  EnergySumZdcTemplate& operator=(const EnergySumZdcTemplate&);
 
 public:
   struct ObjectParameter {
@@ -65,11 +65,11 @@ public:
   void print(std::ostream& myCout) const override;
 
   /// output stream operator
-  friend std::ostream& operator<<(std::ostream&, const ZdcEnergySumTemplate&);
+  friend std::ostream& operator<<(std::ostream&, const EnergySumZdcTemplate&);
 
 private:
   /// copy function for copy constructor and operator=
-  void copy(const ZdcEnergySumTemplate& cp);
+  void copy(const EnergySumZdcTemplate& cp);
 
 private:
   /// variables containing the parameters
