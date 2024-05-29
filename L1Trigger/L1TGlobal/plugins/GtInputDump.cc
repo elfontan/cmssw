@@ -37,6 +37,7 @@
 #include "DataFormats/L1Trigger/interface/Tau.h"
 #include "DataFormats/L1Trigger/interface/Jet.h"
 #include "DataFormats/L1Trigger/interface/EtSum.h"
+#include "DataFormats/L1CaloTrigger/interface/CICADA.h"
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/MessageLogger/interface/MessageDrop.h"
@@ -58,6 +59,7 @@ namespace l1t {
     EDGetToken tauToken;
     EDGetToken jetToken;
     EDGetToken etsumToken;
+    EDGetToken cicadaToken;
 
     int m_minBx;
     int m_maxBx;
@@ -69,7 +71,8 @@ namespace l1t {
     tauToken = consumes<BXVector<l1t::Tau>>(iConfig.getParameter<InputTag>("tauInputTag"));
     jetToken = consumes<BXVector<l1t::Jet>>(iConfig.getParameter<InputTag>("jetInputTag"));
     etsumToken = consumes<BXVector<l1t::EtSum>>(iConfig.getParameter<InputTag>("etsumInputTag"));
-
+    cicadaToken = consumes<l1t::CICADABxCollection>(iConfig.getParameter<InputTag>("CICADAInputTag"));
+    
     m_minBx = iConfig.getParameter<int>("minBx");
     m_maxBx = iConfig.getParameter<int>("maxBx");
   }
@@ -92,6 +95,9 @@ namespace l1t {
     Handle<BXVector<l1t::EtSum>> etsums;
     iEvent.getByToken(etsumToken, etsums);
 
+    Handle<l1t::CICADABxCollection> cicadaScore; 
+    iEvent.getByToken(cicadaToken, cicadaScore);
+   
     printf("\n -------------------------------------- \n");
     printf(" ***********  New Event  ************** \n");
     printf(" -------------------------------------- \n");
