@@ -59,6 +59,7 @@ namespace l1t {
     TypeHTT,
     TypeHTM,
     TypeETMHF,
+    TypeHTMHF,
     TypeTowerCount,
     TypeMinBiasHFP0,
     TypeMinBiasHFM0,

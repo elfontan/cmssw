@@ -297,6 +297,7 @@ void l1t::TriggerMenuParser::parseCondFormats(const L1TUtmTriggerMenu* utmMenu) 
                    condition.getType() == esConditionType::MissingEt ||
                    condition.getType() == esConditionType::MissingHt ||
                    condition.getType() == esConditionType::MissingEtHF ||
+                   condition.getType() == esConditionType::MissingHtHF ||
                    condition.getType() == esConditionType::TowerCount ||
                    condition.getType() == esConditionType::MinBiasHFP0 ||
                    condition.getType() == esConditionType::MinBiasHFM0 ||
@@ -632,7 +633,8 @@ bool l1t::TriggerMenuParser::parseScales(std::map<std::string, tmeventsetup::esS
           // There are no scales for these in the XML so the other case statements will not be seen....do it here.
           if (scale.getObjectType() == esObjectType::ETT || scale.getObjectType() == esObjectType::HTT ||
               scale.getObjectType() == esObjectType::ETM || scale.getObjectType() == esObjectType::HTM ||
-              scale.getObjectType() == esObjectType::ETTEM || scale.getObjectType() == esObjectType::ETMHF) {
+              scale.getObjectType() == esObjectType::ETTEM || scale.getObjectType() == esObjectType::ETMHF
+	      || scale.getObjectType() == esObjectType::HTMHF) {
             scaleParam->etaMin = -1.;
             scaleParam->etaMax = -1.;
             scaleParam->etaStep = -1.;
@@ -2211,6 +2213,9 @@ bool l1t::TriggerMenuParser::parseEnergySum(L1TUtmCondition condEnergySum, unsig
   } else if (condEnergySum.getType() == esConditionType::MissingEtHF) {
     energySumObjType = GlobalObject::gtETMHF;
     cType = TypeETMHF;
+  } else if (condEnergySum.getType() == esConditionType::MissingHtHF) {
+    energySumObjType = GlobalObject::gtHTMHF;
+    cType = TypeHTMHF;
   } else if (condEnergySum.getType() == esConditionType::TowerCount) {
     energySumObjType = GlobalObject::gtTowerCount;
     cType = TypeTowerCount;
