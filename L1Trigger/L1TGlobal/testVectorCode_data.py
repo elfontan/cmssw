@@ -174,7 +174,7 @@ process.simGtStage2Digis.EGammaInputTag      = cms.InputTag("gtStage2Digis", "EG
 process.simGtStage2Digis.TauInputTag         = cms.InputTag("gtStage2Digis", "Tau")
 process.simGtStage2Digis.JetInputTag         = cms.InputTag("gtStage2Digis", "Jet")
 process.simGtStage2Digis.EtSumInputTag       = cms.InputTag("gtStage2Digis", "ETSum")
-process.simGtStage2Digis.CICADAInputTag      = cms.InputTag("simCaloStage2Layer1Summary", "CICADAScore"),
+process.simGtStage2Digis.CICADAInputTag      = cms.InputTag("simCaloStage2Layer1Summary", "CICADAScore")
 process.simGtStage2Digis.EtSumZdcInputTag    = cms.InputTag("etSumZdcProducer")
 process.simGtStage2Digis.EmulateBxInEvent    = cms.int32(1)
     
@@ -225,7 +225,7 @@ process.gtStage2Raw.EGammaInputTag     = cms.InputTag("gtInput")
 process.gtStage2Raw.TauInputTag        = cms.InputTag("gtInput")
 process.gtStage2Raw.JetInputTag        = cms.InputTag("gtInput")
 process.gtStage2Raw.EtSumInputTag      = cms.InputTag("gtInput")
-process.gtStage2Raw.CICADAInputTag     = cms.InputTag("simCaloStage2Layer1Summary", "CICADAScore"),
+process.gtStage2Raw.CICADAInputTag     = cms.InputTag("simCaloStage2Layer1Summary", "CICADAScore")
 process.gtStage2Raw.MuonInputTag       = cms.InputTag("gtInput")
 process.gtStage2Raw.MuonShowerInputTag = cms.InputTag("gtInput")
 
@@ -284,7 +284,7 @@ process.l1tGlobalAnalyzer = cms.EDAnalyzer('L1TGlobalAnalyzer',
                                            tauToken       = cms.InputTag("gtStage2Digis", "Tau"),
                                            jetToken       = cms.InputTag("gtStage2Digis", "Jet"),
                                            etSumToken     = cms.InputTag("gtStage2Digis", "EtSum"),
-                                           cicadaToken    = cms.InputTag("simCaloStage2Layer1Summary", "CICADAScore"),
+                                           cicadaToken    = cms.InputTag("gtStage2Digis", ""),
                                            gtAlgToken     = cms.InputTag("simGtStage2Digis"),
                                            emulDxAlgToken = cms.InputTag("None"),
                                            emulGtAlgToken = cms.InputTag("simGtStage2Digis")
