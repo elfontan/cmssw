@@ -41,7 +41,7 @@
 #include "DataFormats/L1Trigger/interface/Tau.h"
 #include "DataFormats/L1Trigger/interface/Jet.h"
 #include "DataFormats/L1Trigger/interface/EtSum.h"
-
+#include "DataFormats/L1CaloTrigger/interface/CICADA.h"
 #include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
 #include "DataFormats/L1TGlobal/interface/GlobalExtBlk.h"
 #include "DataFormats/L1TGlobal/interface/GlobalObject.h"
@@ -77,6 +77,7 @@ namespace l1t {
     EDGetToken tauToken;
     EDGetToken jetToken;
     EDGetToken etsumToken;
+    EDGetToken cicadaToken;
     EDGetToken uGtAlgToken;
     EDGetToken uGtExtToken;
     EDGetToken uGtObjectMapToken;
@@ -89,6 +90,7 @@ namespace l1t {
                          Handle<BXVector<l1t::Tau>> taus,
                          Handle<BXVector<l1t::Jet>> jets,
                          Handle<BXVector<l1t::EtSum>> etsums,
+                         Handle<l1t::CICADABxCollection> cicadaScore,
                          Handle<BXVector<GlobalAlgBlk>> uGtAlg,
                          Handle<BXVector<GlobalExtBlk>> uGtExt);
 
@@ -134,6 +136,7 @@ namespace l1t {
     tauToken = consumes<BXVector<l1t::Tau>>(iConfig.getParameter<InputTag>("tauInputTag"));
     jetToken = consumes<BXVector<l1t::Jet>>(iConfig.getParameter<InputTag>("jetInputTag"));
     etsumToken = consumes<BXVector<l1t::EtSum>>(iConfig.getParameter<InputTag>("etsumInputTag"));
+    cicadaToken = consumes<l1t::CICADABxCollection>(iConfig.getParameter<InputTag>("CICADAInputTag"));
     uGtAlgToken = consumes<BXVector<GlobalAlgBlk>>(uGtAlgInputTag);
     uGtExtToken = consumes<BXVector<GlobalExtBlk>>(uGtExtInputTag);
     uGtObjectMapToken = consumes<GlobalObjectMapRecord>(iConfig.getParameter<InputTag>("uGtObjectMapInputTag"));
@@ -185,6 +188,9 @@ namespace l1t {
 
     Handle<BXVector<l1t::EtSum>> etsums;
     iEvent.getByToken(etsumToken, etsums);
+
+    Handle<l1t::CICADABxCollection> cicadaScore;
+    iEvent.getByToken(cicadaToken, cicadaScore);
 
     Handle<BXVector<GlobalAlgBlk>> uGtAlg;
     iEvent.getByToken(uGtAlgToken, uGtAlg);
@@ -545,7 +551,8 @@ namespace l1t {
               if (etsum->getType() == l1t::EtSum::EtSumType::kMissingEt ||
                   etsum->getType() == l1t::EtSum::EtSumType::kMissingHt ||
                   etsum->getType() == l1t::EtSum::EtSumType::kMissingEtHF ||
-                  etsum->getType() == l1t::EtSum::EtSumType::kMissingHtHF)
+		  etsum->getType() == l1t::EtSum::EtSumType::kMissingHtHF
+		  )
                 cout << " Phi " << std::dec << std::setw(3) << etsum->hwPhi() << " (0x" << std::hex << std::setw(2)
                      << std::setfill('0') << etsum->hwPhi() << ")";
               cout << endl;
@@ -601,7 +608,7 @@ namespace l1t {
         //	      (i>=etsums->getFirstBX()  && i<=etsums->getLastBX()) &&
         //	      (i>=uGtAlg->getFirstBX()  && i<=uGtAlg->getLastBX()) &&
         //	      (i>=uGtAlg->getFirstBX()  && i<=uGtAlg->getLastBX()) ) {
-        dumpTestVectors(i, m_testVectorFile, muons, muonShowers, egammas, taus, jets, etsums, uGtAlg, uGtExt);
+        dumpTestVectors(i, m_testVectorFile, muons, muonShowers, egammas, taus, jets, etsums, cicadaScore, uGtAlg, uGtExt);
         //	 } else {
         //	      edm::LogWarning("GtRecordDump") << "WARNING: Not enough information to dump test vectors for this bx=" << i << endl;
         //	 }
@@ -640,6 +647,7 @@ namespace l1t {
                                      Handle<BXVector<l1t::Tau>> taus,
                                      Handle<BXVector<l1t::Jet>> jets,
                                      Handle<BXVector<l1t::EtSum>> etsums,
+                                     Handle<l1t::CICADABxCollection> cicadaScore,
                                      Handle<BXVector<GlobalAlgBlk>> uGtAlg,
                                      Handle<BXVector<GlobalExtBlk>> uGtExt) {
     const int empty = 0;
