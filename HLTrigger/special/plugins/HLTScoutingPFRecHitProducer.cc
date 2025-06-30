@@ -34,25 +34,19 @@ HLTScoutingPFRecHitProducer::HLTScoutingPFRecHitProducer(const edm::ParameterSet
 }
 
 void HLTScoutingPFRecHitProducer::produce(edm::StreamID sid, edm::Event& iEvent, edm::EventSetup const& setup) const {
-
   auto const& recoPFRecHits = iEvent.get(recoPFRecHitsToken_);
 
   auto run3ScoutPFRecHits = std::make_unique<Run3ScoutingPFRecHitCollection>();
   run3ScoutPFRecHits->reserve(recoPFRecHits.size());
 
   for (auto const& recoPFRecHit : recoPFRecHits) {
-
     if (recoPFRecHit.energy() < minEnergy_) {
       continue;
     }
 
     run3ScoutPFRecHits->emplace_back(
-      recoPFRecHit.detId(),
-      MiniFloatConverter::reduceMantissaToNbitsRounding(recoPFRecHit.energy(), mantissaPrecision_),
-      MiniFloatConverter::reduceMantissaToNbitsRounding(recoPFRecHit.positionREP().rho(), mantissaPrecision_),
-      MiniFloatConverter::reduceMantissaToNbitsRounding(recoPFRecHit.positionREP().eta(), mantissaPrecision_),
-      MiniFloatConverter::reduceMantissaToNbitsRounding(recoPFRecHit.positionREP().phi(), mantissaPrecision_)
-    );
+        recoPFRecHit.detId(),
+        MiniFloatConverter::reduceMantissaToNbitsRounding(recoPFRecHit.energy(), mantissaPrecision_));
   }
 
   iEvent.put(std::move(run3ScoutPFRecHits));
