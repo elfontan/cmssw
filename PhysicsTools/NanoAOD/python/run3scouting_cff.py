@@ -834,3 +834,76 @@ scoutingFatPFJetReclusterMatchGenExtensionTable = cms.EDProducer("SimplePFJetFla
         genJetAK8Idx = ExtVar(cms.InputTag("scoutingFatPFJetReclusterMatchGen"), int, doc="gen jet idx"),
     ),
 )
+
+
+##########################
+# AK11 PFJet Reclustered #
+##########################
+
+# AK11 jet clustering
+
+scoutingFat11PFJetRecluster = ak4PFJets.clone(
+    src = ("scoutingPFCandidate"),
+    rParam   = 1.1,
+    jetPtMin = 170.0,
+)
+
+# AK11 jet softdrop mass
+
+scoutingFat11PFJetReclusterSoftDrop = ak4PFJets.clone(
+    src = ("scoutingPFCandidate"),
+    rParam   = 1.1,
+    jetPtMin = 170.0,
+    useSoftDrop = cms.bool(True),
+    zcut = cms.double(0.1),
+    beta = cms.double(0.0),
+    R0   = cms.double(1.1),
+    useExplicitGhosts = cms.bool(True),
+    writeCompound = cms.bool(True),
+    jetCollInstanceName=cms.string("SubJets"),
+)
+
+scoutingFat11PFJetReclusterSoftDropMass = cms.EDProducer("RecoJetDeltaRValueMapProducer",
+    src = cms.InputTag("scoutingFat11PFJetRecluster"),
+    matched = cms.InputTag("scoutingFat11PFJetReclusterSoftDrop"),
+    distMax = cms.double(1.1),
+    value = cms.string("mass")
+)
+
+# AK11 jet substructure variables 
+
+from RecoJets.JetProducers.ECF_cff import ecfNbeta1
+scoutingFat11PFJetReclusterEcfNbeta1 = ecfNbeta1.clone(src = cms.InputTag("scoutingFat11PFJetRecluster"), srcWeights="")
+
+from RecoJets.JetProducers.nJettinessAdder_cfi import Njettiness
+scoutingFat11PFJetReclusterNjettiness = Njettiness.clone(src = cms.InputTag("scoutingFat11PFJetRecluster"), srcWeights="")
+
+# output AK11 jet to nanoaod::flattable
+
+scoutingFat11PFJetReclusterTable = cms.EDProducer("SimplePFJetFlatTableProducer",
+    src = cms.InputTag("scoutingFat11PFJetRecluster"),
+    name = cms.string("ScoutingFat11PFJetRecluster"),
+    cut = cms.string(""),
+    doc = cms.string("ak11 jet from re-clustering scouting PF Candidates"),
+    singleton = cms.bool(False),
+    extension = cms.bool(False),
+    variables = cms.PSet(
+        P4Vars,
+        area = Var("jetArea()", float, doc="jet catchment area, for JECs",precision=10),
+        # energy fractions
+        chHEF = Var("chargedHadronEnergyFraction()", float, doc="charged Hadron Energy Fraction", precision= 6),
+        neHEF = Var("neutralHadronEnergyFraction()", float, doc="neutral Hadron Energy Fraction", precision= 6),
+        chEmEF = Var("chargedEmEnergyFraction()", float, doc="charged Electromagnetic Energy Fraction", precision= 6),
+        neEmEF = Var("neutralEmEnergyFraction()", float, doc="neutral Electromagnetic Energy Fraction", precision= 6),
+        muEF = Var("muonEnergyFraction()", float, doc="muon Energy Fraction", precision= 6),
+        hfHEF = Var("HFHadronEnergyFraction()",float,doc="hadronic Energy Fraction in HF",precision= 6),
+        hfEmEF = Var("HFEMEnergyFraction()",float,doc="electromagnetic Energy Fraction in HF",precision= 6),
+        # multiplicities
+        nCh = Var("chargedHadronMultiplicity()", int, doc="number of charged hadrons in the jet"),
+        nNh = Var("neutralHadronMultiplicity()", int, doc="number of neutral hadrons in the jet"),
+        nMuons = Var("muonMultiplicity()", int, doc="number of muons in the jet"),
+        nElectrons = Var("electronMultiplicity()", int, doc="number of electrons in the jet"),
+        nPhotons = Var("photonMultiplicity()", int, doc="number of photons in the jet"),
+        nConstituents = Var("numberOfDaughters()", "uint8", doc="number of particles in the jet")
+    ),
+)

@@ -65,6 +65,14 @@ scoutingFatPFJetReclusterMatchGenExtensionTask = cms.Task(
     scoutingFatPFJetReclusterMatchGenExtensionTable
 )
 
+scoutingFat11PFJetReclusterTask = cms.Task(
+    scoutingPFCandidate, # translate to reco::PFCandidate, used as input
+    scoutingFat11PFJetRecluster, # jet clustering
+    scoutingFat11PFJetReclusterSoftDrop, scoutingFat11PFJetReclusterSoftDropMass, # softdrop mass
+    scoutingFat11PFJetReclusterEcfNbeta1, scoutingFat11PFJetReclusterNjettiness, # substructure variables
+    scoutingFat11PFJetReclusterTable
+)
+
 ############################
 # Trigger Bits and Objects #
 ############################
@@ -107,6 +115,7 @@ def prepareScoutingNanoTaskCommon():
     # Scouting derived objects
     scoutingNanoTaskCommon.add(scoutingPFJetReclusterTask)
     scoutingNanoTaskCommon.add(scoutingFatPFJetReclusterTask)
+    scoutingNanoTaskCommon.add(scoutingFat11PFJetReclusterTask)
 
     return scoutingNanoTaskCommon
 
