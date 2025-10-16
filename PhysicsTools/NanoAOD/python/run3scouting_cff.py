@@ -879,7 +879,6 @@ from RecoJets.JetProducers.nJettinessAdder_cfi import Njettiness
 scoutingFat11PFJetReclusterNjettiness = Njettiness.clone(src = cms.InputTag("scoutingFat11PFJetRecluster"), srcWeights="")
 
 # output AK11 jet to nanoaod::flattable
-
 scoutingFat11PFJetReclusterTable = cms.EDProducer("SimplePFJetFlatTableProducer",
     src = cms.InputTag("scoutingFat11PFJetRecluster"),
     name = cms.string("ScoutingFat11PFJetRecluster"),
@@ -905,5 +904,99 @@ scoutingFat11PFJetReclusterTable = cms.EDProducer("SimplePFJetFlatTableProducer"
         nElectrons = Var("electronMultiplicity()", int, doc="number of electrons in the jet"),
         nPhotons = Var("photonMultiplicity()", int, doc="number of photons in the jet"),
         nConstituents = Var("numberOfDaughters()", "uint8", doc="number of particles in the jet")
+    ),
+    externalVariables = cms.PSet(
+        # softdrop mass
+        msoftdrop = ExtVar(cms.InputTag("scoutingFat11PFJetReclusterSoftDropMass"), float, doc="Softdrop mass", precision=10),
+        # substructure variables    
+        n2b1 = ExtVar(cms.InputTag("scoutingFat11PFJetReclusterEcfNbeta1:ecfN2"), float, doc="N2 with beta=1", precision=10),
+        n3b1 = ExtVar(cms.InputTag("scoutingFat11PFJetReclusterEcfNbeta1:ecfN3"), float, doc="N3 with beta=1", precision=10),
+        tau1 = ExtVar(cms.InputTag("scoutingFat11PFJetReclusterNjettiness:tau1"), float, doc="Nsubjettiness (1 axis)", precision=10),
+        tau2 = ExtVar(cms.InputTag("scoutingFat11PFJetReclusterNjettiness:tau2"), float, doc="Nsubjettiness (2 axis)", precision=10),
+        tau3 = ExtVar(cms.InputTag("scoutingFat11PFJetReclusterNjettiness:tau3"), float, doc="Nsubjettiness (3 axis)", precision=10),
+        tau4 = ExtVar(cms.InputTag("scoutingFat11PFJetReclusterNjettiness:tau4"), float, doc="Nsubjettiness (4 axis)", precision=10),
+    ),
+)
+
+
+##########################
+# AK15 PFJet Reclustered #
+##########################
+
+# AK15 jet clustering
+
+scoutingFat15PFJetRecluster = ak4PFJets.clone(
+    src = ("scoutingPFCandidate"),
+    rParam   = 1.5,
+    jetPtMin = 170.0,
+)
+
+# AK15 jet softdrop mass
+
+scoutingFat15PFJetReclusterSoftDrop = ak4PFJets.clone(
+    src = ("scoutingPFCandidate"),
+    rParam   = 1.5,
+    jetPtMin = 170.0,
+    useSoftDrop = cms.bool(True),
+    zcut = cms.double(0.1),
+    beta = cms.double(0.0),
+    R0   = cms.double(1.5),
+    useExplicitGhosts = cms.bool(True),
+    writeCompound = cms.bool(True),
+    jetCollInstanceName=cms.string("SubJets"),
+)
+
+scoutingFat15PFJetReclusterSoftDropMass = cms.EDProducer("RecoJetDeltaRValueMapProducer",
+    src = cms.InputTag("scoutingFat15PFJetRecluster"),
+    matched = cms.InputTag("scoutingFat15PFJetReclusterSoftDrop"),
+    distMax = cms.double(1.5),
+    value = cms.string("mass")
+)
+
+# AK15 jet substructure variables 
+
+from RecoJets.JetProducers.ECF_cff import ecfNbeta1
+scoutingFat15PFJetReclusterEcfNbeta1 = ecfNbeta1.clone(src = cms.InputTag("scoutingFat15PFJetRecluster"), srcWeights="")
+
+from RecoJets.JetProducers.nJettinessAdder_cfi import Njettiness
+scoutingFat15PFJetReclusterNjettiness = Njettiness.clone(src = cms.InputTag("scoutingFat15PFJetRecluster"), srcWeights="")
+
+# output AK15 jet to nanoaod::flattable
+scoutingFat15PFJetReclusterTable = cms.EDProducer("SimplePFJetFlatTableProducer",
+    src = cms.InputTag("scoutingFat15PFJetRecluster"),
+    name = cms.string("ScoutingFat15PFJetRecluster"),
+    cut = cms.string(""),
+    doc = cms.string("ak15 jet from re-clustering scouting PF Candidates"),
+    singleton = cms.bool(False),
+    extension = cms.bool(False),
+    variables = cms.PSet(
+        P4Vars,
+        area = Var("jetArea()", float, doc="jet catchment area, for JECs",precision=10),
+        # energy fractions
+        chHEF = Var("chargedHadronEnergyFraction()", float, doc="charged Hadron Energy Fraction", precision= 6),
+        neHEF = Var("neutralHadronEnergyFraction()", float, doc="neutral Hadron Energy Fraction", precision= 6),
+        chEmEF = Var("chargedEmEnergyFraction()", float, doc="charged Electromagnetic Energy Fraction", precision= 6),
+        neEmEF = Var("neutralEmEnergyFraction()", float, doc="neutral Electromagnetic Energy Fraction", precision= 6),
+        muEF = Var("muonEnergyFraction()", float, doc="muon Energy Fraction", precision= 6),
+        hfHEF = Var("HFHadronEnergyFraction()",float,doc="hadronic Energy Fraction in HF",precision= 6),
+        hfEmEF = Var("HFEMEnergyFraction()",float,doc="electromagnetic Energy Fraction in HF",precision= 6),
+        # multiplicities
+        nCh = Var("chargedHadronMultiplicity()", int, doc="number of charged hadrons in the jet"),
+        nNh = Var("neutralHadronMultiplicity()", int, doc="number of neutral hadrons in the jet"),
+        nMuons = Var("muonMultiplicity()", int, doc="number of muons in the jet"),
+        nElectrons = Var("electronMultiplicity()", int, doc="number of electrons in the jet"),
+        nPhotons = Var("photonMultiplicity()", int, doc="number of photons in the jet"),
+        nConstituents = Var("numberOfDaughters()", "uint8", doc="number of particles in the jet")
+    ),
+    externalVariables = cms.PSet(
+        # softdrop mass
+        msoftdrop = ExtVar(cms.InputTag("scoutingFat15PFJetReclusterSoftDropMass"), float, doc="Softdrop mass", precision=10),
+        # substructure variables    
+        n2b1 = ExtVar(cms.InputTag("scoutingFat15PFJetReclusterEcfNbeta1:ecfN2"), float, doc="N2 with beta=1", precision=10),
+        n3b1 = ExtVar(cms.InputTag("scoutingFat15PFJetReclusterEcfNbeta1:ecfN3"), float, doc="N3 with beta=1", precision=10),
+        tau1 = ExtVar(cms.InputTag("scoutingFat15PFJetReclusterNjettiness:tau1"), float, doc="Nsubjettiness (1 axis)", precision=10),
+        tau2 = ExtVar(cms.InputTag("scoutingFat15PFJetReclusterNjettiness:tau2"), float, doc="Nsubjettiness (2 axis)", precision=10),
+        tau3 = ExtVar(cms.InputTag("scoutingFat15PFJetReclusterNjettiness:tau3"), float, doc="Nsubjettiness (3 axis)", precision=10),
+        tau4 = ExtVar(cms.InputTag("scoutingFat15PFJetReclusterNjettiness:tau4"), float, doc="Nsubjettiness (4 axis)", precision=10),
     ),
 )
