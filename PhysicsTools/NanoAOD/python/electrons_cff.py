@@ -882,6 +882,17 @@ electronParTLLScores = _electronParTTags.clone(
     flav_names=cms.vstring(["prompt", "tau", "heavy", "light", "fake"]),
 )
 
+electronParTLLScoresRun2 = _electronParTTags.clone(
+    src=cms.InputTag("electronParTTrainVariables"),
+    srcLeps=cms.InputTag("linkedObjects", "electrons"),
+    model_path=cms.FileInPath(
+        'PhysicsTools/NanoAOD/data/ParTElectronIdRun2/v2/electron_ParT_2018.onnx'),
+    preprocess_json=cms.string(
+        'PhysicsTools/NanoAOD/data/ParTElectronIdRun2/v2/preprocess.json'),
+    # [prompt, tau, heavy, light, fake]
+    flav_names=cms.vstring(["prompt", "tau", "heavy", "light", "fake"]),
+)
+
 ################################################electronParticleTransformer end#####################
 
 ################################################electronTable defn #####################
@@ -985,6 +996,21 @@ electronTable = simplePATElectronFlatTableProducer.clone(
         parTScore_fake=ExtVar(cms.InputTag("electronParTLLScores:fake"), float,
                               doc="ParTLL electron ID score for leptons with no matched generated particle", precision=14),    
     ),
+)
+
+# Run 2 re-training of the ParT electron ID, only scheduled for Run 2 eras
+run2_egamma.toModify(
+    electronTable.externalVariables,
+    parTScoreRun2_prompt=ExtVar(cms.InputTag("electronParTLLScoresRun2:prompt"), float,
+                                doc="ParTLL Run2 electron ID score for lepton from W/Z/H bosons", precision=14),
+    parTScoreRun2_tau=ExtVar(cms.InputTag("electronParTLLScoresRun2:tau"), float,
+                             doc="ParTLL Run2 electron ID score for leptons from a tau lepton", precision=14),
+    parTScoreRun2_heavy=ExtVar(cms.InputTag("electronParTLLScoresRun2:heavy"), float,
+                               doc="ParTLL Run2 electron ID score for lepton from B or D hadrons", precision=14),
+    parTScoreRun2_light=ExtVar(cms.InputTag("electronParTLLScoresRun2:light"), float,
+                               doc="ParTLL Run2 electron ID score for lepton from hadrons w/o b or c quarks", precision=14),
+    parTScoreRun2_fake=ExtVar(cms.InputTag("electronParTLLScoresRun2:fake"), float,
+                              doc="ParTLL Run2 electron ID score for leptons with no matched generated particle", precision=14),
 )
 
 # extra variables for e/gamma custom nano
@@ -1224,6 +1250,7 @@ electronMCTable = cms.EDProducer("CandMCMatchTableProducer",
 electronTask = cms.Task(bitmapVIDForEle,bitmapVIDForEleFall17V2,bitmapVIDForEleHEEP,isoForEle,isoForEleFall17V2,ptRatioRelForEle,seedGainEle,slimmedElectronsWithUserData,finalElectrons)
 # electronTablesTask = cms.Task(electronPROMPTMVA, electronPNetVariables, electronPNetScores, electronParTVariables, electronParTTrainVariables, electronParTScores, electronParTLLScores, electronTable)
 electronTablesTask = cms.Task(electronPROMPTMVA, electronParTTrainVariables, electronParTLLScores, electronTable)
+run2_egamma.toModify(electronTablesTask, func=lambda t: t.add(electronParTLLScoresRun2))
 electronMCTask = cms.Task(tautaggerForMatching, matchingElecPhoton, electronsMCMatchForTable, electronsMCMatchForTableAlt, electronMCTable)
 
 _electronTask_Run2 = electronTask.copy()

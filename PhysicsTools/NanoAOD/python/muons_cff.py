@@ -564,6 +564,16 @@ muonParTLLScores = _muonParTTags.clone(
     # debugMode=cms.untracked.bool(True),
 )
 
+muonParTLLScoresRun2 = _muonParTTags.clone(
+    src=cms.InputTag("muonParTTrainVariables"),
+    srcLeps=cms.InputTag("linkedObjects", "muons"),
+    model_path='PhysicsTools/NanoAOD/data/ParTMuonIdRun2/v2/muon_ParT_2018.onnx',
+    preprocess_json='PhysicsTools/NanoAOD/data/ParTMuonIdRun2/v2/preprocess.json',
+    # [fake, prompt, tau, heavy, light]
+    flav_names=cms.vstring(["fake", "prompt", "tau", "heavy", "light"]),
+    # debugMode=cms.untracked.bool(True),
+)
+
 muonBSConstrain = cms.EDProducer("MuonBeamspotConstraintValueMapProducer",
                                  src=cms.InputTag("linkedObjects", "muons"),
                                  )
@@ -663,6 +673,16 @@ run2_nanoAOD_ANY.toModify(
     ptRatioRelForMu, srcJet="updatedJets"
 )
 
+# Run 2 re-training of the ParT muon ID, only scheduled for Run 2 eras
+run2_nanoAOD_ANY.toModify(
+    muonTable.externalVariables,
+    parTScoreRun2_prompt=ExtVar(cms.InputTag("muonParTLLScoresRun2:prompt"), float, doc="ParTLL Run2 muon ID score for lepton from W/Z/H bosons", precision=14),
+    parTScoreRun2_heavy=ExtVar(cms.InputTag("muonParTLLScoresRun2:heavy"), float, doc="ParTLL Run2 muon ID score for lepton from B or D hadrons", precision=14),
+    parTScoreRun2_light=ExtVar(cms.InputTag("muonParTLLScoresRun2:light"), float, doc="ParTLL Run2 muon ID score for lepton from hadrons w/o b or c quarks OR w/o generator matching", precision=14),
+    parTScoreRun2_tau=ExtVar(cms.InputTag("muonParTLLScoresRun2:tau"), float, doc="ParTLL Run2 muon ID score for decay of tau to light leptons (mu)", precision=14),
+    parTScoreRun2_fake=ExtVar(cms.InputTag("muonParTLLScoresRun2:fake"), float, doc="ParTLL Run2 muon ID score for fake leptons", precision=14),
+)
+
 
 muonsMCMatchForTable = cms.EDProducer("MCMatcher",       # cut on deltaR, deltaPt/Pt; pick best by deltaR
                                       src=muonTable.src,                         # final reco collection
@@ -699,3 +719,4 @@ muonTask = cms.Task(slimmedMuonsUpdated,isoForMu,ptRatioRelForMu,slimmedMuonsWit
 muonMCTask = cms.Task(muonsMCMatchForTable,muonMCTable)
 # muonTablesTask = cms.Task(muonPROMPTMVA,muonMVALowPt,muonBSConstrain,muonTable,muonMVAID,muonPNetVariables,muonPNetScores, muonParTVariables, muonParTTrainVariables, muonParTScores, muonParTLLScores)
 muonTablesTask = cms.Task(muonPROMPTMVA,muonMVALowPt,muonBSConstrain,muonTable,muonMVAID,muonPNetVariables,muonPNetScores, muonParTTrainVariables, muonParTLLScores)
+run2_nanoAOD_ANY.toModify(muonTablesTask, func=lambda t: t.add(muonParTLLScoresRun2))
