@@ -672,7 +672,7 @@ def setupBTagging(process, jetSource, pfCandidates, explicitJTA, pvSource, svSou
                                       flip = flip),
                                     process, task)
 
-            if ('ParticleTransformerAK4TagInfos' in btagInfo) and ('UnifiedParticleTransformerAK4TagInfos' not in btagInfo): #We also have to veto UParT is we select ParT
+            if ('ParticleTransformerAK4TagInfos' in btagInfo) and ('UnifiedParticleTransformerAK4TagInfos' not in btagInfo) and ('NoPIDParticleTransformerAK4TagInfos' not in btagInfo): #We also have to veto UParT is we select ParT
                 svUsed = svSource
                 if btagInfo == 'pfNegativeParticleTransformerAK4TagInfos':
                     svUsed, flip, max_sip3dsig_for_flip = cms.InputTag(btagPrefix+'inclusiveCandidateNegativeSecondaryVertices'+labelName+postfix), True, 10.
@@ -701,7 +701,37 @@ def setupBTagging(process, jetSource, pfCandidates, explicitJTA, pvSource, svSou
                                       max_sip3dsig_for_flip=max_sip3dsig_for_flip),
                                     process, task)
                 
-            if 'UnifiedParticleTransformerAK4TagInfos' in btagInfo:
+            if 'NoPIDParticleTransformerAK4TagInfos' in btagInfo:
+                svUsed = svSource
+                if btagInfo == 'pfNegativeUnifiedParticleTransformerAK4TagInfos':
+                    svUsed = cms.InputTag(btagPrefix+'inclusiveCandidateNegativeSecondaryVertices'+labelName+postfix)
+                    flip = True 
+                else:
+                    flip = False
+                # use right input tags when running with RECO PF candidates, which actually
+                # depends of whether jets use "particleFlow"
+                if 'packedPFCandidates' in pfCandidates.value():
+                    vertex_associator = cms.InputTag("")
+                else:
+                    vertex_associator = cms.InputTag("primaryVertexAssociation","original")
+
+                # If this jet is a puppi jet, then set is_weighted_jet to true.
+                is_weighted_jet = False
+                if ('puppi' in jetSource.value().lower()):
+                    is_weighted_jet = True
+                addToProcessAndTask(btagPrefix+btagInfo+labelName+postfix,
+                                    btag.pfNoPIDParticleTransformerAK4TagInfos.clone(
+                                      jets = jetSource,
+                                      vertices=pvSource,
+                                      secondary_vertices=svUsed,
+                                      puppi_value_map = puppi_value_map,
+                                      vertex_associator = vertex_associator,
+                                    #   is_weighted_jet = is_weighted_jet,
+                                      is_weighted_jet = False,
+                                      flip = flip),
+                                    process, task)
+
+            if 'UnifiedParticleTransformerAK4TagInfos' in btagInfo and not "My" in btagInfo:
                 svUsed = svSource
                 if btagInfo == 'pfNegativeUnifiedParticleTransformerAK4TagInfos':
                     svUsed = cms.InputTag(btagPrefix+'inclusiveCandidateNegativeSecondaryVertices'+labelName+postfix)
@@ -810,7 +840,7 @@ def setupBTagging(process, jetSource, pfCandidates, explicitJTA, pvSource, svSou
                                       ),
                                     process, task)
 
-            if btagInfo == 'pfParticleNetTagInfos' or btagInfo == 'pfGlobalParticleTransformerAK8TagInfos':
+            if btagInfo in ('pfParticleNetTagInfos', 'pfGlobalParticleTransformerAK8TagInfos', 'pfParticleTransformerAK15TagInfos'):
                 if 'packedPFCandidates' in pfCandidates.value():
                     # case 1: running over jets whose daughters are PackedCandidates (only via updateJetCollection for now)
                     vertex_associator = ""
