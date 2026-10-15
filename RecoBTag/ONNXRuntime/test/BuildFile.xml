@@ -1,0 +1,3 @@
+<bin file="testUParTNoPID.cpp" name="testUParTNoPID">
+  <use name="RecoBTag/ONNXRuntime"/>
+</bin>
