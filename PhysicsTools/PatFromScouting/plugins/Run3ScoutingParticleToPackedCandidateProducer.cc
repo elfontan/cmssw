@@ -10,6 +10,7 @@
 
 #include <memory>
 #include <cmath>
+#include <array>
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/stream/EDProducer.h"
@@ -34,6 +35,13 @@
 
 #include "SimGeneral/HepPDTRecord/interface/ParticleDataTable.h"
 
+namespace {
+  constexpr std::array<const char*, 8> scoutingFloatMapNames{
+      "scoutingNormchi2", "scoutingDz", "scoutingDxy", "scoutingDzsig",
+      "scoutingDxysig", "scoutingTrkPt", "scoutingTrkEta", "scoutingTrkPhi"};
+  constexpr std::array<const char*, 2> scoutingIntMapNames{"scoutingLostInnerHits", "scoutingQuality"};
+}
+
 class Run3ScoutingParticleToPackedCandidateProducer : public edm::stream::EDProducer<> {
 public:
   typedef edm::Association<reco::VertexCollection> CandToVertex;
@@ -51,6 +59,7 @@ private:
   const edm::EDGetTokenT<reco::TrackCollection> trackToken_;
   const edm::ESGetToken<HepPDT::ParticleDataTable, edm::DefaultRecord> pdtToken_;
   const bool useCHS_;
+  const bool produceScoutingValueMaps_;
   const int covarianceVersion_;
   const int covarianceSchema_;
 };
@@ -62,6 +71,7 @@ Run3ScoutingParticleToPackedCandidateProducer::Run3ScoutingParticleToPackedCandi
       trackToken_(consumes<reco::TrackCollection>(iConfig.getParameter<edm::InputTag>("tracks"))),
       pdtToken_(esConsumes<HepPDT::ParticleDataTable, edm::DefaultRecord>()),
       useCHS_(iConfig.getParameter<bool>("CHS")),
+      produceScoutingValueMaps_(iConfig.getParameter<bool>("produceScoutingValueMaps")),
       covarianceVersion_(iConfig.getParameter<int>("covarianceVersion")),
       covarianceSchema_(iConfig.getParameter<int>("covarianceSchema")) {
   produces<reco::PFCandidateCollection>("recoCands");
@@ -70,6 +80,12 @@ Run3ScoutingParticleToPackedCandidateProducer::Run3ScoutingParticleToPackedCandi
   produces<edm::ValueMap<int>>("quality");
   produces<edm::ValueMap<int>>("vtxass");
   produces<CandToVertex>("vtxass");
+  if (produceScoutingValueMaps_) {
+    for (const auto* name : scoutingFloatMapNames)
+      produces<edm::ValueMap<float>>(name);
+    for (const auto* name : scoutingIntMapNames)
+      produces<edm::ValueMap<int>>(name);
+  }
 }
 
 void Run3ScoutingParticleToPackedCandidateProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -96,6 +112,8 @@ void Run3ScoutingParticleToPackedCandidateProducer::produce(edm::Event& iEvent, 
   std::vector<int> vtx_ass;
   std::vector<int> qual;
   std::vector<int> pfToPVVector;
+  std::array<std::vector<float>, scoutingFloatMapNames.size()> scoutingFloatValues;
+  std::array<std::vector<int>, scoutingIntMapNames.size()> scoutingIntValues;
 
   for (unsigned int ic = 0, nc = particles.size(); ic < nc; ++ic) {
 	  const auto& particle = particles[ic];
@@ -245,11 +263,39 @@ void Run3ScoutingParticleToPackedCandidateProducer::produce(edm::Event& iEvent, 
     mapping[ic] = ic;
     outputReco->push_back(pfCand);
     output->push_back(cand);
+    if (produceScoutingValueMaps_) {
+      // Fill alongside the accepted candidate and key the maps to recoCands.
+      // Keep the original scouting measurements, not the matched-track values
+      // used by the HLT feature path. Track coordinates are made absolute.
+      const std::array<float, scoutingFloatMapNames.size()> values{
+          particle.normchi2(), particle.dz(), particle.dxy(), particle.dzsig(),
+          particle.dxysig(), trkPt, trkEta, trkPhi};
+      for (std::size_t i = 0; i < values.size(); ++i)
+        scoutingFloatValues[i].push_back(values[i]);
+      scoutingIntValues[0].push_back(particle.lostInnerHits());
+      scoutingIntValues[1].push_back(particle.quality());
+    }
     qual.push_back(cand.hasTrackDetails() ? cand.pseudoTrack().qualityMask() : (1 << reco::TrackBase::loose));
     vtx_ass.push_back(cand.pvAssociationQuality());
   }
 
   auto pfHandle = iEvent.put(std::move(outputReco), "recoCands");
+  if (produceScoutingValueMaps_) {
+    for (std::size_t i = 0; i < scoutingFloatMapNames.size(); ++i) {
+      auto values = std::make_unique<edm::ValueMap<float>>();
+      edm::ValueMap<float>::Filler filler(*values);
+      filler.insert(pfHandle, scoutingFloatValues[i].begin(), scoutingFloatValues[i].end());
+      filler.fill();
+      iEvent.put(std::move(values), scoutingFloatMapNames[i]);
+    }
+    for (std::size_t i = 0; i < scoutingIntMapNames.size(); ++i) {
+      auto values = std::make_unique<edm::ValueMap<int>>();
+      edm::ValueMap<int>::Filler filler(*values);
+      filler.insert(pfHandle, scoutingIntValues[i].begin(), scoutingIntValues[i].end());
+      filler.fill();
+      iEvent.put(std::move(values), scoutingIntMapNames[i]);
+    }
+  }
   assert(mapping.size() == pfHandle->size());
   auto oh = iEvent.put(std::move(output));
   auto pf2pc = std::make_unique<edm::Association<pat::PackedCandidateCollection>>(oh);
@@ -288,6 +334,8 @@ void Run3ScoutingParticleToPackedCandidateProducer::fillDescriptions(edm::Config
   desc.add<edm::InputTag>("tracks", edm::InputTag("scoutingTracks"))
       ->setComment("Input reco::Track collection for embedding track details");
   desc.add<bool>("CHS", false)->setComment("Apply Charged Hadron Subtraction (skip vtx > 0)");
+  desc.add<bool>("produceScoutingValueMaps", false)
+      ->setComment("Save original scouting track features keyed to recoCands for scouting ParticleNet");
   desc.add<int>("covarianceVersion", 1)->setComment("Covariance parameterization version (0=Phase0, 1=Phase1)");
   desc.add<int>("covarianceSchema", 520)->setComment("Covariance packing schema");
   descriptions.addWithDefaultLabel(desc);
